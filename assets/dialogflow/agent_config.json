@@ -1,0 +1,47 @@
+{
+  "displayName": "Mindscape Mood Tracker",
+  "description": "Empathetic AI assistant for UGM students with side gigs - mood tracking and burnout support",
+  "language": "id",
+  "timeZone": "Asia/Jakarta",
+  "defaultTimezone": "Asia/Jakarta",
+  "supportedLanguages": ["id", "en"],
+  "enableLogging": true,
+  "enableSpellChecking": true,
+  "classificationThreshold": 0.3,
+  "apiVersion": "v2",
+  "project": "mood-tracker-for-thesis-igb9",
+  "clientEmail": "mood-tracker-bot@mood-tracker-for-thesis-igb9.iam.gserviceaccount.com",
+  "avatar": "🤖",
+  "personality": {
+    "tone": "empathetic",
+    "language_style": "indonesian_casual",
+    "target_audience": "university_students",
+    "use_emoji": true,
+    "empathy_level": "high"
+  },
+  "features": {
+    "crisis_detection": true,
+    "mood_context_awareness": true,
+    "indonesian_slang_support": true,
+    "academic_stress_recognition": true,
+    "side_gig_burnout_support": true
+  },
+  "crisis_keywords": [
+    "bunuh diri",
+    "suicide", 
+    "mati aja",
+    "gak kuat lagi",
+    "putus asa",
+    "depresi berat",
+    "panic attack",
+    "self harm",
+    "cutting"
+  ],
+  "response_templates": {
+    "greeting": "Hai! Gimana kabar kamu hari ini? 😊",
+    "mood_inquiry": "Ceritain dong, mood kamu gimana sekarang?",
+    "empathy_high": "Aku ngerasain kamu lagi tough banget sekarang 💙",
+    "support_offer": "Aku di sini buat dengerin kamu, always 🤗",
+    "crisis_referral": "Kayaknya kamu butuh dukungan lebih dari yang bisa aku kasih. Ada konselor UGM yang siap bantu kamu 💙"
+  }
+}

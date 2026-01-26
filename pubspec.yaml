@@ -1,0 +1,75 @@
+name: mindscape_flutter
+description: "Adaptive mood tracker for UGM students with side gigs - supporting burnout management through empathetic AI."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Local Storage (offline-first approach)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+  
+  # HTTP & API for Dialogflow integration
+  http: ^1.1.2
+  dio: ^5.4.0
+  
+  # Google Services for Dialogflow ES
+  googleapis: ^11.4.0
+  googleapis_auth: ^1.4.1
+  
+  # Speech & Voice Recognition
+  speech_to_text: ^6.5.1
+  flutter_tts: ^3.8.3
+  
+  # UI & Animations
+  animations: ^2.0.8
+  flutter_staggered_animations: ^1.1.1
+  
+  # Charts & Data Visualization
+  fl_chart: ^0.65.0
+  
+  # Device Info & Context Detection
+  device_info_plus: ^9.1.1
+  sensors_plus: ^4.0.2
+  permission_handler: ^11.1.0
+  
+  # Privacy & Security
+  crypto: ^3.0.3
+  
+  # Date & Time utilities
+  intl: ^0.18.1
+  
+  # Icons
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  
+  # Code generation for Hive
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.7
+  
+  # Testing
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  
+  # Assets for Dialogflow configurations
+  assets:
+    - assets/dialogflow/

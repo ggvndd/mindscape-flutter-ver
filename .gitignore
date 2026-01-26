@@ -1,0 +1,86 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+ARCHITECTURE.md
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# API Keys and Credentials (IMPORTANT - NEVER COMMIT THESE)
+*.json
+!assets/dialogflow/agent_config.json
+!assets/dialogflow/intents/*.json
+!assets/dialogflow/entities/*.json
+lib/core/config/api_keys.dart
+lib/core/config/credentials.dart
+service-account-key.json
+google-services.json
+GoogleService-Info.plist
+
+# Environment and Configuration Files
+.env
+.env.local
+.env.production
+.env.staging
+config/
+
+# Firebase and Google Cloud
+firebase_options.dart
+
+# Dialogflow Credentials (NEVER COMMIT)
+dialogflow-credentials.json
+dialogflow-key.json
+service_account.json
+
+# User-specific IDE settings
+.vscode/
+*.code-workspace
+
+# Logs and temporary files
+logs/
+*.tmp
+*.temp
+
+# Research data (optional - uncomment if needed)
+# research_data/
+# user_study_results/
+# analytics_exports/
