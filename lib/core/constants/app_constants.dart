@@ -21,7 +21,7 @@ class AppConstants {
   ];
 }
 
-/// Mood types with emoji representations
+/// Mood types with emoji representations and colors
 enum MoodType {
   veryHappy('😄', 'Sangat Senang', 5),
   happy('😊', 'Senang', 4),

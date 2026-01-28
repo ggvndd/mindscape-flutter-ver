@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../presentation/providers/adaptive_provider.dart';
-import '../presentation/screens/onboarding/welcome_screen.dart';
-import '../presentation/screens/main/home_screen.dart';
 import '../core/constants/app_constants.dart';
 import '../domain/entities/adaptive_context.dart';
 import 'themes/app_theme.dart';
@@ -34,7 +32,7 @@ class App extends StatelessWidget {
           builder: (context, child) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                textScaleFactor: _getAdaptiveTextScale(adaptiveProvider.currentContext),
+                textScaler: TextScaler.linear(_getAdaptiveTextScale(adaptiveProvider.currentContext)),
               ),
               child: child ?? const SizedBox.shrink(),
             );

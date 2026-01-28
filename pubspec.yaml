@@ -35,6 +35,7 @@ dependencies:
   # UI & Animations
   animations: ^2.0.8
   flutter_staggered_animations: ^1.1.1
+  google_fonts: ^6.1.0
   
   # Charts & Data Visualization
   fl_chart: ^0.65.0
