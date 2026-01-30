@@ -23,7 +23,7 @@
     "updated": 0
   },
   {
-    "id": "ac843aec-4674-47c3-b24b-4d80965ad83f",
+    "id": "ac843aec-4674-47c3-b24b-4d80965ad83f", 
     "data": [
       {
         "text": "Gue lagi ",
@@ -36,17 +36,7 @@
         "userDefined": false
       },
       {
-        "text": " nih, soalnya tadi ",
-        "userDefined": false
-      },
-      {
-        "text": "tugas",
-        "meta": "@stress-source",
-        "alias": "stress-source",
-        "userDefined": false
-      },
-      {
-        "text": " selesai tepat waktu",
+        "text": " nih",
         "userDefined": false
       }
     ],
@@ -65,7 +55,7 @@
       {
         "text": "mantap",
         "meta": "@mood_level",
-        "alias": "mood_level",
+        "alias": "mood_level", 
         "userDefined": false
       },
       {
@@ -82,21 +72,11 @@
     "id": "5d1e5a89-3b7c-4e2f-8a9d-6f3e4c7b8a5d",
     "data": [
       {
-        "text": "Mood booster banget tadi, ",
+        "text": "lagi ",
         "userDefined": false
       },
       {
-        "text": "client",
-        "meta": "@stress-source",
-        "alias": "stress-source",
-        "userDefined": false
-      },
-      {
-        "text": " approve semua revisi, jadi ",
-        "userDefined": false
-      },
-      {
-        "text": "lega",
+        "text": "happy",
         "meta": "@mood_level",
         "alias": "mood_level",
         "userDefined": false
@@ -111,23 +91,13 @@
     "id": "6f2a8b3c-9e4d-7a1b-5c6e-8f9a0b2c3d4e",
     "data": [
       {
-        "text": "Finally ",
+        "text": "mood ",
         "userDefined": false
       },
       {
-        "text": "happy",
+        "text": "bagus",
         "meta": "@mood_level",
         "alias": "mood_level",
-        "userDefined": false
-      },
-      {
-        "text": " lagi setelah seminggu stress gara-gara ",
-        "userDefined": false
-      },
-      {
-        "text": "skripsi",
-        "meta": "@stress-source",
-        "alias": "stress-source",
         "userDefined": false
       }
     ],
@@ -140,72 +110,11 @@
     "id": "7e3b9c4d-0a5f-8b2e-6d7a-9c8b0e3f4a5b",
     "data": [
       {
-        "text": "Gue ",
+        "text": "vibes-nya ",
         "userDefined": false
       },
       {
-        "text": "grateful",
-        "meta": "@mood_level",
-        "alias": "mood_level",
-        "userDefined": false
-      },
-      {
-        "text": " banget hari ini, soalnya dapat ",
-        "userDefined": false
-      },
-      {
-        "text": "orderan",
-        "meta": "@stress-source",
-        "alias": "stress-source",
-        "userDefined": false
-      },
-      {
-        "text": " lumayan",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  }
-],
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "cdb9d089-d06f-4fe6-bb9e-a484b8211ea0",
-    "data": [
-      {
-        "text": "feeling ",
-        "userDefined": false
-      },
-      {
-        "text": "good",
-        "meta": "@platform",
-        "alias": "platform",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "0fe2c5f4-d089-4e71-8986-117efae3de64",
-    "data": [
-      {
-        "text": "lagi ",
-        "userDefined": false
-      },
-      {
-        "text": "happy",
+        "text": "keren",
         "meta": "@mood_level",
         "alias": "mood_level",
         "userDefined": false
@@ -217,25 +126,14 @@
     "updated": 0
   },
   {
-    "id": "d1adbab1-5971-44fc-b5bc-c41d45af0470",
+    "id": "8a9b0c1d-2e3f-4g5h-6i7j-8k9l0m1n2o3p",
     "data": [
       {
-        "text": "good mood",
-        "meta": "@platform",
-        "alias": "platform",
+        "text": "on ",
         "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "34a2f086-6d0b-4e7b-b413-715c5cb785d5",
-    "data": [
+      },
       {
-        "text": "semangat",
+        "text": "fire",
         "meta": "@mood_level",
         "alias": "mood_level",
         "userDefined": false
@@ -247,105 +145,14 @@
     "updated": 0
   },
   {
-    "id": "0f695bdd-71c8-47fc-a9d4-15a46cdafd09",
+    "id": "9b0c1d2e-3f4g-5h6i-7j8k-9l0m1n2o3p4q",
     "data": [
       {
-        "text": "bahagia",
-        "meta": "@mood_level",
-        "alias": "mood_level",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "1e364f64-c5ad-4ce3-90b0-44f00bf24b58",
-    "data": [
-      {
-        "text": "happy",
-        "meta": "@mood_level",
-        "alias": "mood_level",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "081bd011-8458-47ca-bf88-60f032bce44e",
-    "data": [
-      {
-        "text": "mood",
-        "meta": "@platform",
-        "alias": "platform",
+        "text": "semangat banget nih, lagi ",
         "userDefined": false
       },
       {
-        "text": " baik",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "3aad0e85-f12f-4742-b870-bc2e3e43ad43",
-    "data": [
-      {
-        "text": "lagi ",
-        "userDefined": false
-      },
-      {
-        "text": "senang",
-        "meta": "@mood_level",
-        "alias": "mood_level",
-        "userDefined": false
-      },
-      {
-        "text": " banget",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "00eda412-ca9c-4112-9bdf-12bdd8ec34e1",
-    "data": [
-      {
-        "text": "lagi ",
-        "userDefined": false
-      },
-      {
-        "text": "seneng",
-        "meta": "@mood_level",
-        "alias": "mood_level",
-        "userDefined": false
-      }
-    ],
-    "isTemplate": false,
-    "count": 0,
-    "lang": "id",
-    "updated": 0
-  },
-  {
-    "id": "94a19d64-f4d3-41ca-bcba-1590867f4b2c",
-    "data": [
-      {
-        "text": "aku ",
-        "userDefined": false
-      },
-      {
-        "text": "senang",
+        "text": "excited",
         "meta": "@mood_level",
         "alias": "mood_level",
         "userDefined": false
