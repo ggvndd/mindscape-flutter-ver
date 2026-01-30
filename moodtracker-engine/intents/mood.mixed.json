@@ -1,0 +1,74 @@
+{
+  "id": "mood-mixed-intent",
+  "name": "mood.mixed",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "mood.mixed",
+      "affectedContexts": [
+        {
+          "name": "complex-emotion-followup",
+          "parameters": {},
+          "lifespan": 5
+        }
+      ],
+      "parameters": [
+        {
+          "id": "mood-param",
+          "name": "mood_level",
+          "required": false,
+          "dataType": "@mood_level",
+          "value": "$mood_level",
+          "defaultValue": "",
+          "isList": false,
+          "prompts": [],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": []
+        },
+        {
+          "id": "stress-param",
+          "name": "stress-source",
+          "required": false,
+          "dataType": "@stress-source",
+          "value": "$stress-source",
+          "defaultValue": "",
+          "isList": false,
+          "prompts": [],
+          "promptMessages": [],
+          "noMatchPromptMessages": [],
+          "noInputPromptMessages": [],
+          "outputDialogContexts": []
+        }
+      ],
+      "messages": [
+        {
+          "type": "0",
+          "title": "",
+          "textToSpeech": "",
+          "lang": "id",
+          "speech": [
+            "Wah, aku ngerti banget feeling kayak gini. Emosi campuran memang complicated ya. Normal kok kalau kita ngerasa contradictory emotions. Mau cerita lebih detail gak? Aku siap dengerin 💭",
+            "Mixed feelings itu natural banget, especially kalau lagi banyak hal yang terjadi. Sometimes life itu gak hitam putih kan? Ada yang mau diuraikan gak?",
+            "Aku paham, kadang hati dan pikiran bisa beda arah gitu ya. It's okay to feel conflicted. Mungkin kita bisa sort out perasaan ini together? 😊",
+            "Emotional roller coaster ya? Valid banget kok perasaan kayak gini. Hidup mahasiswa yang balance kuliah-kerja emang bikin mixed emotions. Want to talk about it?",
+            "Understandable banget! Life is complex, emotions juga complex. Mau kita breakdown satu-satu gak feeling-nya? Sometimes talking helps to clarify 🌈"
+          ],
+          "condition": ""
+        }
+      ],
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}

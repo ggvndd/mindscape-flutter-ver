@@ -1,0 +1,9 @@
+{
+  "id": "time-context-entity",
+  "name": "time_context",
+  "isOverridable": true,
+  "isEnum": false,
+  "isRegexp": false,
+  "automatedExpansion": true,
+  "allowFuzzyExtraction": true
+}

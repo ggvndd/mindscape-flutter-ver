@@ -1,0 +1,80 @@
+[
+  {
+    "id": "checkin-001",
+    "data": [
+      {
+        "text": "Gimana kabarnya hari ini?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "checkin-002", 
+    "data": [
+      {
+        "text": "Lagi ngapain?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id", 
+    "updated": 0
+  },
+  {
+    "id": "checkin-003",
+    "data": [
+      {
+        "text": "Hari ini gimana?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "checkin-004",
+    "data": [
+      {
+        "text": "Halo, mood-nya gimana?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "checkin-005",
+    "data": [
+      {
+        "text": "Ada yang mau diceritain gak?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "checkin-006",
+    "data": [
+      {
+        "text": "Butuh temen ngobrol?",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  }
+]

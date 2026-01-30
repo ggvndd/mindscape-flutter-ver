@@ -1,0 +1,192 @@
+[
+  {
+    "id": "3991cb3f-32b3-4b21-98d7-1aa0c5c2fe44",
+    "data": [
+      {
+        "text": "gaada ",
+        "userDefined": false
+      },
+      {
+        "text": "harapan",
+        "meta": "@sys.location",
+        "alias": "location",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "c23c06ca-b53d-46a2-8399-2ce48ed4159d",
+    "data": [
+      {
+        "text": "nggak ada ",
+        "userDefined": false
+      },
+      {
+        "text": "harapan",
+        "meta": "@sys.location",
+        "alias": "location",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "0f1edfea-94e6-4872-9945-435587674c62",
+    "data": [
+      {
+        "text": "udah ",
+        "userDefined": false
+      },
+      {
+        "text": "capek",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "gini",
+        "meta": "@mood_level",
+        "alias": "mood_level1",
+        "userDefined": false
+      },
+      {
+        "text": " terus",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "03852f45-566f-4494-893a-770916c16b4a",
+    "data": [
+      {
+        "text": "putus asa",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "10545c9c-3288-493f-ab42-604382e3984b",
+    "data": [
+      {
+        "text": "self harm",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "7987ea5f-0cc6-4559-b328-fd557a110ad3",
+    "data": [
+      {
+        "text": "suicide",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "4e517c4f-7ae5-4c37-920d-fe06188b7c94",
+    "data": [
+      {
+        "text": "pengen ngakhirin hidup",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "905c591e-dee0-45fe-80e5-db632f4721ce",
+    "data": [
+      {
+        "text": "hidup ga ada artinya",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "b0ebf17c-65e1-4095-a593-bc2940deb681",
+    "data": [
+      {
+        "text": "hidup nggak ada artinya",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "d8d734b5-52f3-4e16-938a-3962e66bbe62",
+    "data": [
+      {
+        "text": "drop dead",
+        "meta": "@sys.location",
+        "alias": "location",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "971b9513-2814-4fbc-8aee-4f738f321a9b",
+    "data": [
+      {
+        "text": "pengen mati",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "56bc5b11-c6b1-4bad-be8a-507b37aaa8bb",
+    "data": [
+      {
+        "text": "mau bunuh diri",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  }
+]

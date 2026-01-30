@@ -1,0 +1,83 @@
+[
+  {
+    "value": "kuliah",
+    "synonyms": [
+      "kuliah", "tugas", "uts", "uas", "skripsi", "proyek", "laprak", "praktikum",
+      "thesis", "TA", "tugas akhir", "bimbingan", "seminar", "presentasi", "sidang",
+      "proposal", "research", "riset", "data collection", "analysis", "literature review",
+      "paper", "jurnal", "conference", "publikasi", "kelas", "mata kuliah", "matkul",
+      "dosen killer", "dosen strict", "professor", "lecturer", "academic", "kampus",
+      "university", "college", "study", "belajar", "exam", "ujian", "quiz", "kuis",
+      "assignment", "homework", "PR", "group work", "kelompok", "team project",
+      "individual project", "final project", "capstone", "internship", "magang",
+      "lab work", "field work", "survey", "interview research"
+    ]
+  },
+  {
+    "value": "side_gig",
+    "synonyms": [
+      "side gig", "kerjaan", "kerja", "client", "klien", "freelance", "job", "orderan",
+      "project", "commission", "gigs", "hustle", "side hustle", "part time", "partime",
+      "remote work", "wfh", "online job", "digital nomad", "contractor", "vendor",
+      "supplier", "service provider", "konsultan", "consultant", "mentor", "tutor",
+      "les privat", "teaching", "ngajar", "design", "developer", "programmer",
+      "content creator", "writer", "translator", "editor", "photographer", "videographer",
+      "social media manager", "digital marketing", "va", "virtual assistant", "admin",
+      "data entry", "research assistant", "survey", "mystery shopper", "driver",
+      "ojek online", "gojek", "grab", "delivery", "kurir", "seller", "jualan",
+      "online shop", "dropship", "reseller", "affiliate", "influencer"
+    ]
+  },
+  {
+    "value": "deadline",
+    "synonyms": [
+      "deadline", "tenggang waktu", "kejar setoran", "due date", "submission",
+      "time limit", "batas waktu", "urgent", "asap", "rush", "priority",
+      "last minute", "mepet", "deadline mepet", "tinggal berapa jam", "besok deadline",
+      "hari ini deadline", "jam segini deadline", "burning deadline", "critical timing",
+      "time pressure", "racing against time", "countdown", "final call", "last chance",
+      "do or die", "crunch time", "panic deadline", "emergency submission",
+      "extended deadline", "deadline extension", "late submission", "overdue"
+    ]
+  },
+  {
+    "value": "keuangan",
+    "synonyms": [
+      "keuangan", "duit", "uang", "tagihan", "utang", "payment", "money", "cash",
+      "budget", "expenses", "pengeluaran", "income", "penghasilan", "salary", "gaji",
+      "allowance", "uang saku", "scholarship", "beasiswa", "student loan", "kpr",
+      "kredit", "cicilan", "installment", "bills", "listrik", "air", "internet",
+      "phone bill", "pulsa", "subscription", "langganan", "netflix", "spotify",
+      "rent", "sewa", "kost", "boarding house", "dorm", "asrama", "makan",
+      "food budget", "transport", "transportasi", "bensin", "gasoline", "grab",
+      "gojek", "taxi", "bus", "emergency fund", "savings", "tabungan", "investment",
+      "investasi", "crypto", "saham", "stocks", "trading", "broke", "bangkrut",
+      "financial crisis", "krisis keuangan", "tight budget", "budget ketat"
+    ]
+  },
+  {
+    "value": "hubungan",
+    "synonyms": [
+      "hubungan", "relationship", "pacar", "boyfriend", "girlfriend", "partner",
+      "crush", "gebetan", "pdkt", "pendekatan", "dating", "kencan", "jadian",
+      "putus", "breakup", "LDR", "long distance", "family", "keluarga", "ortu",
+      "orang tua", "parents", "mama", "papa", "ayah", "ibu", "adik", "kakak",
+      "siblings", "friends", "teman", "bestie", "sahabat", "squad", "circle",
+      "social life", "pergaulan", "toxic relationship", "drama", "conflict", "fight",
+      "bertengkar", "misunderstanding", "salah paham", "jealousy", "cemburu",
+      "trust issues", "commitment", "marriage pressure", "nikah"
+    ]
+  },
+  {
+    "value": "masa_depan",
+    "synonyms": [
+      "masa depan", "future", "career", "karir", "job hunting", "cari kerja",
+      "interview", "wawancara", "application", "lamaran", "CV", "resume",
+      "portfolio", "skill development", "upskilling", "certification", "sertifikat",
+      "competition", "kompetisi", "rivalry", "persaingan", "uncertainty", "gak pasti",
+      "unclear path", "bingung mau ngapain", "lost direction", "quarter life crisis",
+      "life choices", "pilihan hidup", "what if", "regret", "penyesalan",
+      "missed opportunities", "FOMO", "comparison", "banding-bandingin", "impostor syndrome"
+    ]
+  }
+]

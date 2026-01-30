@@ -1,0 +1,306 @@
+[
+  {
+    "id": "909b82da-7d57-4279-9ccd-dd15cdd44d19",
+    "data": [
+      {
+        "text": "susah balance",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "c06cfe06-4bd7-427c-879b-72e2d19e2496",
+    "data": [
+      {
+        "text": "exhausted",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "bda4e14e-99ed-4d6a-99ee-9eb15b1e5301",
+    "data": [
+      {
+        "text": "double burden",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "0837ec13-3a7b-43a6-b516-d9be4fea9e4c",
+    "data": [
+      {
+        "text": "side gig",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " bikin ",
+        "userDefined": false
+      },
+      {
+        "text": "pusing",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "7798e65c-e8c5-4459-9b90-1e01a80fb563",
+    "data": [
+      {
+        "text": "pusing",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "495e29aa-967b-415f-859b-fb7eab671a30",
+    "data": [
+      {
+        "text": "side gig",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " baru rame",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "6dbe5581-b6a5-446c-b25e-7bfe63ec4ce5",
+    "data": [
+      {
+        "text": "tugas",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " numpuk",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "67defd03-dfe8-446b-bf40-49a261aded0e",
+    "data": [
+      {
+        "text": "deadline",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " everywhere",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "193be5a6-0367-422f-80be-10cc402dc339",
+    "data": [
+      {
+        "text": "pressure tinggi",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "a848bac5-ac9d-478e-b2de-19938e79589f",
+    "data": [
+      {
+        "text": "pressure",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "70f490dd-72db-47fd-b690-688f64b2bd50",
+    "data": [
+      {
+        "text": "nggak kuat lagi",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "981e9dba-d5b4-44bc-b9c9-17f3821f5344",
+    "data": [
+      {
+        "text": "overwhelmed",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "9baf1c89-d7a8-4f90-9087-6091f8d6849a",
+    "data": [
+      {
+        "text": "capek",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      },
+      {
+        "text": " ",
+        "userDefined": false
+      },
+      {
+        "text": "kuliah",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " sama ",
+        "userDefined": false
+      },
+      {
+        "text": "kerja",
+        "meta": "@stress-source",
+        "alias": "stress-source1",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "a3864545-3f58-4480-98fa-53e842cdbab9",
+    "data": [
+      {
+        "text": "capek",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "504551d8-ea95-4d50-b924-aa3d90205025",
+    "data": [
+      {
+        "text": "burnout",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "ba97877e-ded3-4338-8b7d-f61a25d16e56",
+    "data": [
+      {
+        "text": "stres",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "9d8d83e7-8fb9-47ac-bb85-ad405995cfcc",
+    "data": [
+      {
+        "text": "stress",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "bcb7ba7f-6790-4928-940d-2a9b234a8ba6",
+    "data": [
+      {
+        "text": "stress",
+        "meta": "@mood_level",
+        "alias": "mood_level",
+        "userDefined": false
+      },
+      {
+        "text": " banget",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  }
+]

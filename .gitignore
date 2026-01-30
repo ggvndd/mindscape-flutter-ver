@@ -50,6 +50,7 @@ app.*.map.json
 !assets/dialogflow/agent_config.json
 !assets/dialogflow/intents/*.json
 !assets/dialogflow/entities/*.json
+!moodtracker-engine/**/*.json
 lib/core/config/api_keys.dart
 lib/core/config/credentials.dart
 service-account-key.json

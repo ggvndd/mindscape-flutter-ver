@@ -1,0 +1,71 @@
+[
+  {
+    "id": "mixed-001",
+    "data": [
+      {
+        "text": "Gue ",
+        "userDefined": false
+      },
+      {
+        "text": "bingung",
+        "meta": "@mood_level", 
+        "alias": "mood_level",
+        "userDefined": false
+      },
+      {
+        "text": " perasaannya, ada seneng ada sedihnya juga",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "mixed-002",
+    "data": [
+      {
+        "text": "Mixed feelings banget, ",
+        "userDefined": false
+      },
+      {
+        "text": "client",
+        "meta": "@stress-source",
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " approve tapi ",
+        "userDefined": false
+      },
+      {
+        "text": "tugas",
+        "meta": "@stress-source", 
+        "alias": "stress-source",
+        "userDefined": false
+      },
+      {
+        "text": " belum kelar",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  },
+  {
+    "id": "mixed-003",
+    "data": [
+      {
+        "text": "Complicated banget rasanya, lagi grateful tapi anxious juga",
+        "userDefined": false
+      }
+    ],
+    "isTemplate": false,
+    "count": 0,
+    "lang": "id",
+    "updated": 0
+  }
+]

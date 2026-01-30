@@ -1,0 +1,49 @@
+{
+  "id": "casual-checkin-intent",
+  "name": "casual.checkin",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "action": "casual.checkin",
+      "affectedContexts": [
+        {
+          "name": "mood-followup",
+          "parameters": {},
+          "lifespan": 3
+        }
+      ],
+      "parameters": [],
+      "messages": [
+        {
+          "type": "0",
+          "title": "",
+          "textToSpeech": "",
+          "lang": "id",
+          "speech": [
+            "Halo! Gimana kabarnya hari ini? 😊",
+            "Hai! Ada yang mau diceritain?",
+            "Hallo, lagi ngapain? Semoga harimu menyenangkan ya!",
+            "Hai there! Mood-nya gimana nih?",
+            "Halo! Butuh temen ngobrol? Aku siap dengerin kok 💭",
+            "Hai! Cerita dong gimana hari ini?",
+            "Hallo! Ada yang bikin kamu stress gak hari ini?",
+            "Hai! Feeling grateful atau lagi down nih?",
+            "Halo! Share mood-mu dong, biar aku bisa bantuin 😊"
+          ],
+          "condition": ""
+        }
+      ],
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": false,
+  "webhookForSlotFilling": false,
+  "fallbackIntent": false,
+  "events": [],
+  "conditionalResponses": [],
+  "condition": "",
+  "conditionalFollowupEvents": []
+}
