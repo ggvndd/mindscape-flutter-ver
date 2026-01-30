@@ -51,6 +51,7 @@ class DialogflowService {
       }
 
       final sessionPath = 'projects/$projectId/agent/sessions/$sessionId';
+      // Using global endpoint as agent resources are in 'global' location
       final endpoint = 'https://dialogflow.googleapis.com/v2/$sessionPath:detectIntent';
       
       final requestBody = {
