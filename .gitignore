@@ -54,6 +54,11 @@ service-account-key.json
 google-services.json
 GoogleService-Info.plist
 
+# Test files with API keys
+test_gemini_terminal.dart
+*_test_api.dart
+*_terminal_test.dart
+
 # Environment and Configuration Files
 .env
 .env.local
