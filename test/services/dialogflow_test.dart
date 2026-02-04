@@ -17,7 +17,7 @@ void main() {
     test('should initialize Dialogflow service', () async {
       // Test credentials configuration
       expect(ApiKeys.isConfigured, isTrue);
-      expect(ApiKeys.dialogflowProjectId, equals('mood-tracker-for-thesis-igb9'));
+      expect(ApiKeys.dialogflowProjectId, equals('mood-tracker-for-thesis'));
       
       // Test service initialization
       await dialogflowService.initialize();
