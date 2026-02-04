@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_constants.dart';
 
 part 'mood_entry.g.dart';
@@ -46,7 +47,7 @@ class MoodEntry extends HiveObject {
   @HiveField(10)
   final int? energyLevel;
   
-  const MoodEntry({
+  MoodEntry({
     required this.id,
     required this.moodType,
     this.description,
@@ -80,6 +81,26 @@ class MoodEntry extends HiveObject {
     );
   }
 
+  factory MoodEntry.fromFirestore(Map<String, dynamic> data, String id) {
+    return MoodEntry(
+      id: id,
+      moodType: MoodType.values.firstWhere(
+        (type) => type.name == data['mood_type'],
+        orElse: () => MoodType.neutral,
+      ),
+      description: data['description'],
+      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      context: data['context'],
+      isQuickEntry: data['is_quick_entry'] ?? false,
+      contextTags: List<String>.from(data['context_tags'] ?? []),
+      location: data['location'] != null ? 
+        LocationContext.fromJson(Map<String, dynamic>.from(data['location'])) : null,
+      activity: data['activity'],
+      stressLevel: data['stress_level'],
+      energyLevel: data['energy_level'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -100,7 +121,7 @@ class MoodEntry extends HiveObject {
   Map<String, dynamic> toTrainingData() {
     return {
       'mood_numeric': moodType.value,
-      'mood_label': moodType.displayName.toLowerCase(),
+      'mood_label': moodType.label.toLowerCase(),
       'timestamp': timestamp.millisecondsSinceEpoch,
       'hour_of_day': timestamp.hour,
       'day_of_week': timestamp.weekday,
@@ -160,7 +181,7 @@ class LocationContext extends HiveObject {
   @HiveField(3)
   final double? longitude;
   
-  const LocationContext({
+  LocationContext({
     required this.type,
     this.name,
     this.latitude,

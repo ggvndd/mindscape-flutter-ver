@@ -20,13 +20,18 @@ dependencies:
   hive_flutter: ^1.1.0
   shared_preferences: ^2.2.2
   
-  # HTTP & API for Dialogflow integration
+  # HTTP & API for Gemini AI integration
   http: ^1.1.2
   dio: ^5.4.0
   
-  # Google Services for Dialogflow ES
-  googleapis: ^11.4.0
-  googleapis_auth: ^1.4.1
+  # Google Gemini AI
+  google_generative_ai: ^0.4.3
+  
+  # Firebase Services
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_analytics: ^10.7.4
   
   # Speech & Voice Recognition
   speech_to_text: ^6.5.1
@@ -71,6 +76,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  # Assets for Dialogflow configurations
+  # Assets for app
   assets:
-    - assets/dialogflow/
+    - assets/images/
+    - assets/logos/

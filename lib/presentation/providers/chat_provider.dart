@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../data/services/dialogflow_service.dart';
-import '../../core/utils/context_detector.dart';
+import '../../data/services/gemini_chat_service.dart';
 
 /// Manages chatbot conversations and empathetic responses
 class ChatProvider extends ChangeNotifier {
-  final DialogflowService _dialogflowService = DialogflowService();
+  final GeminiChatService _geminiChatService = GeminiChatService();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   bool _isInitialized = false;
@@ -14,12 +13,12 @@ class ChatProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isInitialized => _isInitialized;
   
-  /// Initialize Dialogflow service
+  /// Initialize Gemini service
   Future<void> initialize() async {
     if (_isInitialized) return;
     
     try {
-      await _dialogflowService.initialize();
+      await _geminiChatService.testConnectivity();
       _currentSessionId = DateTime.now().millisecondsSinceEpoch.toString();
       _isInitialized = true;
       
@@ -51,11 +50,11 @@ class ChatProvider extends ChangeNotifier {
         await initialize();
       }
       
-      // Send to Dialogflow
-      final response = await _dialogflowService.sendMessage(message, _currentSessionId);
+      // Send to Gemini
+      final response = await _geminiChatService.sendMessage(message);
       
       // Add bot response
-      _addBotMessage(response.text, response: response);
+      _addBotMessage(response);
       
     } catch (e) {
       print('❌ Chat error: $e');
@@ -75,14 +74,13 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  void _addBotMessage(String text, {ChatResponse? response}) {
+  void _addBotMessage(String text) {
     _messages.add(ChatMessage(
       text: text,
       isUser: false,
       timestamp: DateTime.now(),
-      isEmpathetic: response?.isEmpathetic ?? true,
-      suggestedActions: response?.suggestedActions ?? [],
-      shouldEscalate: response?.shouldEscalate ?? false,
+      isEmpathetic: true,
+      shouldEscalate: false,
     ));
     notifyListeners();
   }
@@ -97,7 +95,6 @@ class ChatProvider extends ChangeNotifier {
   
   @override
   void dispose() {
-    _dialogflowService.dispose();
     super.dispose();
   }
 }
@@ -108,7 +105,6 @@ class ChatMessage {
   final bool isUser;
   final DateTime timestamp;
   final bool isEmpathetic;
-  final List<ChatAction> suggestedActions;
   final bool shouldEscalate;
   
   ChatMessage({
@@ -116,7 +112,6 @@ class ChatMessage {
     required this.isUser,
     required this.timestamp,
     this.isEmpathetic = false,
-    this.suggestedActions = const [],
     this.shouldEscalate = false,
   });
 }

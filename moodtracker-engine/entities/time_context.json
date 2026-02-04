@@ -1,9 +1,0 @@
-{
-  "id": "c9d0e1f2-a3b4-4c5d-0e8f-1a2b3c4d5e6f",
-  "name": "time_context",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": true,
-  "allowFuzzyExtraction": true
-}

@@ -48,10 +48,6 @@ app.*.map.json
 
 # API Keys and Credentials (IMPORTANT - NEVER COMMIT THESE)
 *.json
-!assets/dialogflow/agent_config.json
-!assets/dialogflow/intents/*.json
-!assets/dialogflow/entities/*.json
-!moodtracker-engine/**/*.json
 lib/core/config/api_keys.dart
 lib/core/config/credentials.dart
 service-account-key.json
@@ -67,11 +63,6 @@ config/
 
 # Firebase and Google Cloud
 firebase_options.dart
-
-# Dialogflow Credentials (NEVER COMMIT)
-dialogflow-credentials.json
-dialogflow-key.json
-service_account.json
 
 # User-specific IDE settings
 .vscode/

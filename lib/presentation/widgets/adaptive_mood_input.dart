@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/services/adaptive_chat_service.dart';
+import '../../data/services/gemini_chat_service.dart';
+import '../../data/models/mood_entry.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Adaptive mood input widget that switches between rush hour and normal mode
@@ -15,6 +16,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  bool _isRushHour = false;
   
   @override
   void initState() {
@@ -36,20 +38,20 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AdaptiveChatService>(
-      builder: (context, chatService, child) {
+    return Consumer<GeminiChatService>(
+      builder: (context, geminiService, child) {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 400),
-          child: chatService.isRushHour 
-              ? _buildRushHourMode(context, chatService)
-              : _buildNormalMode(context, chatService),
+          child: _isRushHour 
+              ? _buildRushHourMode(context, geminiService)
+              : _buildNormalMode(context, geminiService),
         );
       },
     );
   }
   
   /// Rush hour mode - simplified one-tap mood registration
-  Widget _buildRushHourMode(BuildContext context, AdaptiveChatService chatService) {
+  Widget _buildRushHourMode(BuildContext context, GeminiChatService geminiService) {
     return Card(
       key: const Key('rush_hour_mode'),
       elevation: 4,
@@ -73,7 +75,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () => chatService.disableRushHour(),
+                  onPressed: () => setState(() => _isRushHour = false),
                   icon: const Icon(Icons.close, size: 18),
                   tooltip: 'Exit rush hour',
                 ),
@@ -87,7 +89,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
               ),
             ),
             const SizedBox(height: 20),
-            _buildQuickMoodButtons(context, chatService),
+            _buildQuickMoodButtons(context, geminiService),
             const SizedBox(height: 16),
             _buildQuickContextTags(context),
           ],
@@ -97,7 +99,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
   }
   
   /// Normal mode - detailed mood input with conversation
-  Widget _buildNormalMode(BuildContext context, AdaptiveChatService chatService) {
+  Widget _buildNormalMode(BuildContext context, GeminiChatService geminiService) {
     return Card(
       key: const Key('normal_mode'),
       elevation: 2,
@@ -120,7 +122,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
                 ),
                 const Spacer(),
                 TextButton.icon(
-                  onPressed: () => _showRushHourDialog(context, chatService),
+                  onPressed: () => _showRushHourDialog(context, geminiService),
                   icon: const Icon(Icons.flash_on, size: 16),
                   label: const Text('Rush'),
                   style: TextButton.styleFrom(
@@ -130,7 +132,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailedMoodSelection(context, chatService),
+            _buildDetailedMoodSelection(context, geminiService),
             const SizedBox(height: 20),
             _buildNoteInput(context),
             const SizedBox(height: 16),
@@ -141,8 +143,8 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     );
   }
   
-  Widget _buildQuickMoodButtons(BuildContext context, AdaptiveChatService chatService) {
-    final moods = MoodLevel.values;
+  Widget _buildQuickMoodButtons(BuildContext context, GeminiChatService geminiService) {
+    final moods = MoodType.values;
     
     return Wrap(
       spacing: 8,
@@ -150,12 +152,12 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
       children: moods.map((mood) => _buildQuickMoodButton(
         context,
         mood,
-        onTap: () => _handleQuickMoodSelection(context, chatService, mood),
+        onTap: () => _handleQuickMoodSelection(context, geminiService, mood),
       )).toList(),
     );
   }
   
-  Widget _buildQuickMoodButton(BuildContext context, MoodLevel mood, {required VoidCallback onTap}) {
+  Widget _buildQuickMoodButton(BuildContext context, MoodType mood, {required VoidCallback onTap}) {
     final color = _getMoodColor(mood);
     
     return Material(
@@ -175,7 +177,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
               ),
               const SizedBox(width: 6),
               Text(
-                mood.displayName,
+                mood.label,
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.w600,
@@ -204,7 +206,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     );
   }
   
-  Widget _buildDetailedMoodSelection(BuildContext context, AdaptiveChatService chatService) {
+  Widget _buildDetailedMoodSelection(BuildContext context, GeminiChatService geminiService) {
     return Column(
       children: [
         Text(
@@ -219,7 +221,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
   
   Widget _buildMoodSlider(BuildContext context) {
     return Column(
-      children: MoodLevel.values.map((mood) => 
+      children: MoodType.values.map((mood) => 
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
@@ -236,7 +238,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       child: Text(
-                        mood.displayName,
+                        mood.label,
                         style: TextStyle(
                           color: _getMoodColor(mood),
                           fontWeight: FontWeight.w500,
@@ -337,7 +339,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     );
   }
   
-  void _showRushHourDialog(BuildContext context, AdaptiveChatService chatService) {
+  void _showRushHourDialog(BuildContext context, GeminiChatService geminiService) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -359,8 +361,8 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              chatService.enableRushHour(duration: const Duration(hours: 2));
-              _showSnackBar(context, 'Rush hour enabled for 2 hours ⚡');
+              setState(() => _isRushHour = true);
+              _showSnackBar(context, 'Rush hour enabled ⚡');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.amber,
@@ -374,11 +376,19 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
   
   Future<void> _handleQuickMoodSelection(
     BuildContext context,
-    AdaptiveChatService chatService,
-    MoodLevel mood,
+    GeminiChatService geminiService,
+    MoodType mood,
   ) async {
     try {
-      final response = await chatService.registerQuickMood(mood);
+      final moodEntry = MoodEntry(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        moodType: mood,
+        timestamp: DateTime.now(),
+        isQuickEntry: true,
+        contextTags: const [],
+      );
+      
+      final response = await geminiService.generateQuickMoodResponse(moodEntry);
       
       _showMoodRegisteredBottomSheet(context, mood, response);
       
@@ -387,16 +397,16 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     }
   }
   
-  void _handleDetailedMoodSelection(BuildContext context, MoodLevel mood) {
+  void _handleDetailedMoodSelection(BuildContext context, MoodType mood) {
     // Show detailed mood registration dialog
     _showDetailedMoodDialog(context, mood);
   }
   
-  void _showDetailedMoodDialog(BuildContext context, MoodLevel mood) {
+  void _showDetailedMoodDialog(BuildContext context, MoodType mood) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${mood.emoji} ${mood.displayName}'),
+        title: Text('${mood.emoji} ${mood.label}'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -428,7 +438,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     );
   }
   
-  void _showMoodRegisteredBottomSheet(BuildContext context, MoodLevel mood, String response) {
+  void _showMoodRegisteredBottomSheet(BuildContext context, MoodType mood, String response) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -488,7 +498,7 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
                 ),
               ],
             ),
-            const SizedBox(bottom: 16),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -504,17 +514,17 @@ class _AdaptiveMoodInputState extends State<AdaptiveMoodInput>
     );
   }
   
-  Color _getMoodColor(MoodLevel mood) {
+  Color _getMoodColor(MoodType mood) {
     switch (mood) {
-      case MoodLevel.terrible:
+      case MoodType.verySad:
         return Colors.red[600]!;
-      case MoodLevel.bad:
+      case MoodType.sad:
         return Colors.orange[600]!;
-      case MoodLevel.okay:
+      case MoodType.neutral:
         return Colors.amber[600]!;
-      case MoodLevel.good:
+      case MoodType.happy:
         return Colors.lightGreen[600]!;
-      case MoodLevel.great:
+      case MoodType.veryHappy:
         return Colors.green[600]!;
     }
   }

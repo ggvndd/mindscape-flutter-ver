@@ -1,9 +1,0 @@
-{
-  "id": "9f116782-ac8f-4c06-aab3-6e2bb7bdb5ba",
-  "name": "mood_level",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": true,
-  "allowFuzzyExtraction": true
-}

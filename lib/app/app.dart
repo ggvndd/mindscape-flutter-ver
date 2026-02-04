@@ -23,7 +23,7 @@ class App extends StatelessWidget {
           
           // Navigation
           onGenerateRoute: AppRouter.onGenerateRoute,
-          initialRoute: AppRouter.welcomeRoute,
+          initialRoute: AppRouter.splashRoute,
           
           // Global scaffold messenger for snackbars
           scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),

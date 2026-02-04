@@ -183,14 +183,19 @@ await exportTrainingData(trainingData, 'training-data.jsonl');
 
 ## 🔧 Implementation Steps
 
-### Step 1: Setup Dependencies
+### Step 1: Setup Firebase + Gemini Dependencies
 ```yaml
 dependencies:
-  # Chat services
-  http: ^1.1.2
-  dio: ^5.4.0
+  # Firebase services
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  firebase_analytics: ^10.7.4
   
-  # Local storage
+  # Gemini AI
+  google_generative_ai: ^0.4.0
+  
+  # Local storage (offline support)
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   
@@ -198,29 +203,97 @@ dependencies:
   provider: ^6.1.1
 ```
 
-### Step 2: Initialize Services
+### Step 2: Firebase Configuration
 ```dart
+// lib/firebase_options.dart (auto-generated)
+// Run: flutterfire configure
+
+// lib/main.dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Hive
-  await Hive.initFlutter();
-  Hive.registerAdapter(MoodEntryAdapter());
-  Hive.registerAdapter(ConversationContextAdapter());
-  
-  // Initialize chat service
-  final chatService = AdaptiveChatService();
-  await chatService.initialize();
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => chatService),
-      ],
-      child: MyApp(),
-    ),
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Initialize Hive for offline support
+  await Hive.initFlutter();
+  
+  runApp(MyApp());
 }
+```
+
+### Step 3: Authentication Setup
+```dart
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+  // Google Sign-in (perfect for UGM students)
+  Future<User?> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth = 
+        await googleUser?.authentication;
+    
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    
+    final result = await _auth.signInWithCredential(credential);
+    return result.user;
+  }
+  
+  // Email sign-in for non-Google accounts
+  Future<User?> signInWithEmail(String email, String password) async {
+    final result = await _auth.signInWithEmailAndPassword(
+      email: email, password: password);
+    return result.user;
+  }
+}
+```
+
+### Step 4: Firestore Security Rules
+```javascript
+// firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only access their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // User's mood entries
+      match /moods/{moodId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User's conversations
+      match /conversations/{conversationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
+```
+
+### Step 5: Initialize Gemini Service
+```dart
+// lib/main.dart
+final geminiService = GeminiChatService(
+  apiKey: 'your-gemini-api-key', // Store in environment variables
+);
+
+runApp(
+  MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => geminiService),
+      StreamProvider<User?>(
+        create: (_) => FirebaseAuth.instance.authStateChanges(),
+        initialData: null,
+      ),
+    ],
+    child: MyApp(),
+  ),
+);
 ```
 
 ### Step 3: Integrate Adaptive UI
@@ -305,27 +378,95 @@ If all external services fail:
 ## 📱 Usage Example
 
 ```dart
-// Quick mood registration (rush hour)
-final response = await chatService.registerQuickMood(
-  MoodLevel.bad,
-  note: 'Tired from work',
-);
-// -> "Capek abis kerja ya? Rest dulu, you deserve it 💙"
+// Google Sign-in + Gemini Chat Integration
+class MoodChatScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<GeminiChatService>(
+      builder: (context, geminiService, child) {
+        return Scaffold(
+          appBar: AppBar(title: Text('Chat with Mindscape')),
+          body: Column(
+            children: [
+              // Real-time conversation stream from Firestore
+              Expanded(
+                child: StreamBuilder<List<ChatMessage>>(
+                  stream: geminiService.getConversationStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return CircularProgressIndicator();
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final message = snapshot.data![index];
+                        return ChatBubble(message: message);
+                      },
+                    );
+                  },
+                ),
+              ),
+              
+              // Adaptive input (rush hour vs normal)
+              AdaptiveMoodInput(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
-// Full conversation
-final response = await chatService.sendMessage(
-  'I have a big presentation tomorrow and I\'m nervous',
-  metadata: {'context': 'academic_stress'},
+// Quick mood registration (rush hour) with Firebase sync
+final response = await geminiService.generateQuickMoodResponse(
+  MoodEntry(
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    moodType: MoodType.bad,
+    description: 'Tired from work',
+    timestamp: DateTime.now(),
+    isQuickEntry: true,
+    contextTags: ['work', 'tired'],
+  ),
 );
-// -> "Presentation anxiety is totally normal! Udah prepare dari kapan? Let's think through this together..."
+// -> "Capek abis kerja ya? Kamu udah istirahat proper belum? Take care! 💙"
+// Automatically synced to Firestore for cross-device access
+
+// Full conversation with context
+final response = await geminiService.sendMessage(
+  'I have a big presentation tomorrow and I\'m nervous',
+  metadata: {'context': 'academic_stress', 'location': 'ugm_campus'},
+);
+// -> "Presentation anxiety normal banget kok! Udah prepare dari kapan? Let's think through this together..."
+// Full conversation history maintained in Firestore
 ```
 
 ## 🎯 Recommended Implementation Order
 
-1. **Week 1**: Set up OpenAI integration + basic conversation memory
-2. **Week 2**: Implement adaptive UI with rush hour mode
-3. **Week 3**: Add local LLM fallback + crisis detection
-4. **Week 4**: Fine-tune with collected user data
-5. **Week 5**: Analytics dashboard + behavioral insights
+1. **Week 1**: Set up Firebase (Auth + Firestore) + Gemini AI integration
+2. **Week 2**: Implement real-time conversation sync + basic mood tracking
+3. **Week 3**: Add adaptive UI with rush hour mode + offline support
+4. **Week 4**: Implement user behavior analytics + crisis detection
+5. **Week 5**: Add Firebase Functions for server-side processing + notifications
 
-This approach gives you multiple robust alternatives to Dialogflow while providing the adaptive features and conversation memory you need for an effective mood tracking app.
+## 🔥 Why Firebase + Gemini is Perfect for Your App
+
+### Technical Benefits:
+✅ **Single ecosystem** - all Google services work together seamlessly
+✅ **Real-time sync** - conversations sync instantly across devices  
+✅ **Offline-first** - works without internet, syncs when back online
+✅ **Built-in authentication** - Google/Email login out of the box
+✅ **Automatic scaling** - handles growth from 1 to millions of users
+✅ **Security by default** - Firestore security rules protect user data
+
+### UGM Student-Specific Benefits:
+✅ **Indonesian language understanding** - Gemini excels at Indonesian casual conversation
+✅ **Google Workspace integration** - most UGM students already use Google accounts
+✅ **Academic context awareness** - understands campus life and student stress
+✅ **Cost-effective** - Firebase has generous free tier for student projects
+
+### Mood Tracking Integration:
+✅ **Persistent memory** - never forgets previous conversations or moods
+✅ **Cross-device sync** - track mood on phone, chat on laptop
+✅ **Pattern recognition** - identifies mood trends and behavioral patterns
+✅ **Crisis detection** - built-in safety features for mental health support
+✅ **Rush hour adaptability** - switches UI based on detected user patterns
+
+This approach gives you a robust, scalable solution that grows with your user base while providing the empathetic, context-aware conversations your UGM students need.

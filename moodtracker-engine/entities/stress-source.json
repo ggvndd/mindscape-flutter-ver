@@ -1,9 +1,0 @@
-{
-  "id": "242479e7-9342-4215-b2b7-912ac19bf461",
-  "name": "stress-source",
-  "isOverridable": true,
-  "isEnum": false,
-  "isRegexp": false,
-  "automatedExpansion": true,
-  "allowFuzzyExtraction": true
-}
