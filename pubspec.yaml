@@ -27,14 +27,14 @@ dependencies:
   # Google Gemini AI
   google_generative_ai: ^0.4.3
   
-  # Firebase Services
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.15.3
-  cloud_firestore: ^4.13.6
-  firebase_analytics: ^10.7.4
+  # Firebase Services - Updated to compatible versions
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.3
+  firebase_analytics: ^11.3.3
   
   # Speech & Voice Recognition
-  speech_to_text: ^6.5.1
+  speech_to_text: ^7.0.0
   flutter_tts: ^3.8.3
   
   # UI & Animations

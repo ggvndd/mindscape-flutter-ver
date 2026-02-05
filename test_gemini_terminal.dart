@@ -6,10 +6,10 @@ import 'package:http/http.dart' as http;
 void main() async {
   print('🚀 Testing Gemini API Connectivity...\n');
   
-  // Your API configuration
-  const apiKey = 'AIzaSyAdzvoaYlr7QgIcj8T19bIzRJ7CzQS1Kt8';
-  const projectName = 'projects/965920436747';
-  const projectNumber = '965920436747';
+  // Your API configuration - USE ENVIRONMENT VARIABLES
+  const apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: 'YOUR_GEMINI_API_KEY_HERE');
+  const projectName = 'projects/YOUR_PROJECT_ID';
+  const projectNumber = 'YOUR_PROJECT_NUMBER';
   
   print('📊 Configuration:');
   print('   Project: $projectName');

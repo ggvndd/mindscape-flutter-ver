@@ -64,10 +64,12 @@ test_gemini_terminal.dart
 .env.local
 .env.production
 .env.staging
+.env.development
 config/
 
 # Firebase and Google Cloud
 firebase_options.dart
+mood-tracker-for-thesis-474abb7cc426.json
 
 # User-specific IDE settings
 .vscode/

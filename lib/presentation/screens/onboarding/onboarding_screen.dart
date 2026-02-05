@@ -384,7 +384,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return GestureDetector(
       onTap: () {
         if (isLastPage) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/sign-up');
         } else {
           _pageController.nextPage(
             duration: const Duration(milliseconds: 300),
