@@ -320,6 +320,29 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: user != null ? Colors.green[700] : Colors.red[700],
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.pushNamed(context, '/firebase-test'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue[600],
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            icon: const Icon(Icons.science, size: 16),
+                            label: Text(
+                              'Run Firebase Tests',
+                              style: GoogleFonts.urbanist(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

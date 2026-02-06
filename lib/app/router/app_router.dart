@@ -7,6 +7,7 @@ import '../../presentation/screens/auth/rush_hour_screen.dart';
 import '../../presentation/screens/auth/sign_up_success_screen.dart';
 import '../../presentation/screens/auth/sign_in_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
+import '../../presentation/screens/test/firebase_test_screen.dart';
 
 /// App routing configuration
 class AppRouter {
@@ -18,6 +19,7 @@ class AppRouter {
   static const String signUpSuccessRoute = '/sign-up-success';
   static const String signInRoute = '/sign-in';
   static const String homeRoute = '/home';
+  static const String firebaseTestRoute = '/firebase-test';
   
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -37,6 +39,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SignInScreen());
       case homeRoute:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case firebaseTestRoute:
+        return MaterialPageRoute(builder: (_) => const FirebaseTestWidget());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
