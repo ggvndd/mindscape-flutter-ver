@@ -78,8 +78,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   children: [
                     // Logo
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 300,
+                      height: 300,
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
@@ -94,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         borderRadius: BorderRadius.circular(20),
                         child: Image.asset(
                           'assets/logos/Mindscape.png',
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
                             // Fallback if image not found
                             return Container(
@@ -119,19 +120,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             );
                           },
                         ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // App name
-                    Text(
-                      'MindScape',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF3D2914), // Brown text
-                        letterSpacing: 0.5,
                       ),
                     ),
                   ],

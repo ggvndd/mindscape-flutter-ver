@@ -102,14 +102,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          // Mood status
+                          // MindScore and Mood status
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SvgPicture.asset(
-                                'assets/logos/mood.svg',
+                                'assets/logos/chatbot/Vector-1.svg',
                                 width: 20,
                                 height: 20,
+                                colorFilter: const ColorFilter.mode(
+                                  Color(0xFFA8B475),
+                                  BlendMode.srcIn,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Text(
@@ -117,12 +121,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: GoogleFonts.urbanist(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFFA8B475),
+                                  color: Colors.white,
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 16),
+                              SvgPicture.asset(
+                                'assets/logos/profile/Frame 117.svg',
+                                width: 20,
+                                height: 20,
+                                colorFilter: const ColorFilter.mode(
+                                  Color(0xFFA8B475),
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                '😊 Happy',
+                                'Happy',
                                 style: GoogleFonts.urbanist(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,

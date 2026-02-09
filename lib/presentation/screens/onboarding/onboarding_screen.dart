@@ -96,89 +96,71 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
                     child: _buildStepIndicator(page.stepText, isTablet),
                   )
-                : const SizedBox.shrink(),
+                : const SizedBox(height: 20),
           ),
           
           // Main content - takes available space
           Expanded(
             child: page.isWelcome 
-              ? SafeArea(
-                  bottom: false,
-                  child: _buildWelcomeContent(page, isTablet),
-                )
+              ? _buildWelcomeContent(page, isTablet)
               : _buildStepContent(page, isTablet),
           ),
           
-          // Bottom section with white container for step screens
-          if (!page.isWelcome) 
-            _buildBottomContainer(page, index, isLastPage, isTablet)
-          else 
-            SafeArea(
-              top: false,
-              child: _buildWelcomeButton(isLastPage, index, isTablet),
-            ),
+          // Bottom section with white container - consistent for all pages
+          _buildBottomContainer(page, index, isLastPage, isTablet),
         ],
       ),
     );
   }
 
   Widget _buildWelcomeContent(OnboardingData page, bool isTablet) {
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 24.0),
       child: Column(
         children: [
+          const SizedBox(height: 32),
           // Welcome text at top
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  page.title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.urbanist(
-                    fontSize: isTablet ? 28 : 24,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF3D2914),
-                  ),
-                ),
-                Text(
-                  page.subtitle,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.urbanist(
-                    fontSize: isTablet ? 36 : 32,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF3D2914),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  page.description,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.urbanist(
-                    fontSize: isTablet ? 18 : 16,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF666666),
-                    height: 1.5,
-                  ),
-                ),
-              ],
+          Text(
+            page.title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.urbanist(
+              fontSize: isTablet ? 28 : 24,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF3D2914),
             ),
           ),
+          Text(
+            page.subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.urbanist(
+              fontSize: isTablet ? 36 : 32,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF3D2914),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            page.description,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.urbanist(
+              fontSize: isTablet ? 18 : 16,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF666666),
+              height: 1.5,
+            ),
+          ),
+          
+          const SizedBox(height: 32),
           
           // Image
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: _buildImage(page.imagePath, isTablet),
-            ),
-          ),
+          _buildImage(page.imagePath, isTablet),
+          
+          const SizedBox(height: 32),
           
           // Feature icons
-          Expanded(
-            flex: 1,
-            child: Center(child: _buildFeatureIcons(isTablet)),
-          ),
+          _buildFeatureIcons(isTablet),
+          
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -194,90 +176,116 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildBottomContainer(OnboardingData page, int index, bool isLastPage, bool isTablet) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 32 : 24, 
-        vertical: isTablet ? 28 : 24
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    return SafeArea(
+      top: false,
+      bottom: false,  // Set to true to respect home indicator area, false to bleed to bottom edge
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.only(
+          left: isTablet ? 32 : 24,
+          right: isTablet ? 32 : 24,
+          top: isTablet ? 32 : 28,
+          bottom: isTablet ? 28 : 24,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: GoogleFonts.urbanist(
-                fontSize: isTablet ? 32 : 28,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF3D2914),
-                height: 1.2,
-              ),
-              children: [
-                TextSpan(text: page.title),
-                if (page.subtitle.isNotEmpty) ...[
-                  const TextSpan(text: '\n'),
-                  TextSpan(
-                    text: page.subtitle,
-                    style: TextStyle(
-                      color: _getAccentColor(index),
-                    ),
-                  ),
-                ],
-              ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, -2),
             ),
-          ),
-          SizedBox(height: isTablet ? 32 : 24),
-          _buildNavigationButton(isLastPage, index, isTablet),
-          
-          // Login link (only on last page)
-          if (isLastPage) ...[
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/sign-in'),
-              child: RichText(
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Page indicators (dots)
+            _buildPageIndicators(isTablet),
+            SizedBox(height: isTablet ? 24 : 20),
+            
+            // Title and subtitle (hide for welcome page)
+            if (!page.isWelcome)
+              RichText(
+                textAlign: TextAlign.center,
                 text: TextSpan(
                   style: GoogleFonts.urbanist(
-                    fontSize: isTablet ? 16 : 14,
-                    color: const Color(0xFF666666),
+                    fontSize: isTablet ? 32 : 28,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF3D2914),
+                    height: 1.2,
                   ),
                   children: [
-                    const TextSpan(text: 'Sudah memiliki akun? '),
-                    TextSpan(
-                      text: 'Masuk Sekarang',
-                      style: GoogleFonts.urbanist(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFFF8C00),
-                        decoration: TextDecoration.underline,
+                    TextSpan(text: page.title),
+                    if (page.subtitle.isNotEmpty) ...[
+                      const TextSpan(text: '\n'),
+                      TextSpan(
+                        text: page.subtitle,
+                        style: TextStyle(
+                          color: _getAccentColor(index),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
-            ),
+            if (!page.isWelcome) SizedBox(height: isTablet ? 32 : 24),
+            
+            _buildNavigationButton(isLastPage, index, isTablet),
+            
+            // Login link (only on last page)
+            if (isLastPage) ...[
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/sign-in'),
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.urbanist(
+                      fontSize: isTablet ? 16 : 14,
+                      color: const Color(0xFF666666),
+                    ),
+                    children: [
+                      const TextSpan(text: 'Sudah memiliki akun? '),
+                      TextSpan(
+                        text: 'Masuk Sekarang',
+                        style: GoogleFonts.urbanist(
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFFFF8C00),
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildWelcomeButton(bool isLastPage, int index, bool isTablet) {
-    return Padding(
-      padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
-      child: _buildNavigationButton(isLastPage, index, isTablet),
+  Widget _buildPageIndicators(bool isTablet) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(
+        _pages.length,
+        (index) => Container(
+          width: _currentPage == index ? (isTablet ? 32 : 24) : (isTablet ? 10 : 8),
+          height: isTablet ? 10 : 8,
+          margin: EdgeInsets.symmetric(horizontal: isTablet ? 6 : 4),
+          decoration: BoxDecoration(
+            color: _currentPage == index 
+                ? const Color(0xFF3D2914) 
+                : const Color(0xFFD9D9D9),
+            borderRadius: BorderRadius.circular(isTablet ? 5 : 4),
+          ),
+        ),
+      ),
     );
   }
 
@@ -310,7 +318,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildImage(String imagePath, bool isTablet) {
-    final maxSize = isTablet ? 400.0 : 300.0;
+    final double scaleFactor = 5.0; // Change this value (e.g., 0.8, 1.2, 1.5)
+    final maxSize = (isTablet ? 400.0 : 280.0) * scaleFactor;
     
     return Container(
       constraints: BoxConstraints(

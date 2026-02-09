@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
 
@@ -182,11 +183,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back),
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerLeft,
+              GestureDetector(
+                onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pushReplacementNamed(context, '/onboarding');
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFF3D2914), width: 1.5),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logos/back.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Kembali',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF3D2914),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               
               SizedBox(height: isTablet ? 40 : 24),
@@ -228,6 +258,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       error: _nameError,
                       keyboardType: TextInputType.name,
                       isTablet: isTablet,
+                      iconPath: 'assets/logos/sign in and up/email.svg',
                     ),
                     
                     SizedBox(height: isTablet ? 24 : 20),
@@ -241,6 +272,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       error: _emailError,
                       keyboardType: TextInputType.emailAddress,
                       isTablet: isTablet,
+                      iconPath: 'assets/logos/sign in and up/email.svg',
                     ),
                     
                     SizedBox(height: isTablet ? 24 : 20),
@@ -256,6 +288,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       isPasswordVisible: _isPasswordVisible,
                       onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                       isTablet: isTablet,
+                      iconPath: 'assets/logos/sign in and up/password.svg',
                     ),
                     
                     SizedBox(height: isTablet ? 24 : 20),
@@ -271,6 +304,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       isPasswordVisible: _isConfirmPasswordVisible,
                       onTogglePassword: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
                       isTablet: isTablet,
+                      iconPath: 'assets/logos/sign in and up/password.svg',
                     ),
                     
                     SizedBox(height: isTablet ? 40 : 32),
@@ -358,6 +392,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     bool isPassword = false,
     bool isPasswordVisible = false,
     VoidCallback? onTogglePassword,
+    String? iconPath,
   }) {
     final hasError = error != null;
     final isFocused = focusNode.hasFocus;
@@ -397,6 +432,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: const Color(0xFF1A202C),
             ),
             decoration: InputDecoration(
+              prefixIcon: iconPath != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SvgPicture.asset(
+                        iconPath,
+                        width: 20,
+                        height: 20,
+                        color: hasError 
+                            ? const Color(0xFFE53E3E)
+                            : (isFocused || hasContent)
+                                ? const Color(0xFF38A169)
+                                : const Color(0xFFA0AEC0),
+                      ),
+                    )
+                  : null,
               hintText: hint,
               hintStyle: GoogleFonts.urbanist(
                 fontSize: isTablet ? 16 : 14,
@@ -442,13 +492,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         if (hasError) ...[
           const SizedBox(height: 6),
-          Text(
-            error!,
-            style: GoogleFonts.urbanist(
-              fontSize: isTablet ? 14 : 12,
-              color: const Color(0xFFE53E3E),
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            children: [
+              SvgPicture.asset(
+                'assets/logos/sign in and up/warning.svg',
+                width: 16,
+                height: 16,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  error!,
+                  style: GoogleFonts.urbanist(
+                    fontSize: isTablet ? 14 : 12,
+                    color: const Color(0xFFE53E3E),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ],
