@@ -100,9 +100,9 @@ class _SignInScreenState extends State<SignInScreen> {
         password: _passwordController.text,
       );
       
-      // Navigate to home screen on success
+      // Navigate to main navigation screen on success
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/main');
       }
     } catch (e) {
       // Show error message
@@ -432,7 +432,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   style: GoogleFonts.urbanist(
                                     fontSize: isTablet ? 16 : 14,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF3D2914),
+                                    color: const Color(0xFFFFB366),
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),

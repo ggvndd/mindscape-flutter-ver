@@ -7,6 +7,12 @@ import '../../presentation/screens/auth/rush_hour_screen.dart';
 import '../../presentation/screens/auth/sign_up_success_screen.dart';
 import '../../presentation/screens/auth/sign_in_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
+import '../../presentation/screens/main/main_navigation_screen.dart';
+import '../../presentation/screens/profile/profile_screen.dart';
+import '../../presentation/screens/profile/account_settings_screen.dart';
+import '../../presentation/screens/profile/notification_settings_screen.dart';
+import '../../presentation/screens/profile/rush_hour_settings_screen.dart';
+import '../../presentation/screens/profile/security_settings_screen.dart';
 import '../../presentation/screens/test/firebase_test_screen.dart';
 
 /// App routing configuration
@@ -19,6 +25,12 @@ class AppRouter {
   static const String signUpSuccessRoute = '/sign-up-success';
   static const String signInRoute = '/sign-in';
   static const String homeRoute = '/home';
+  static const String mainNavigationRoute = '/main';
+  static const String profileRoute = '/profile';
+  static const String accountSettingsRoute = '/account-settings';
+  static const String notificationSettingsRoute = '/notification-settings';
+  static const String rushHourSettingsRoute = '/rush-hour-settings';
+  static const String securitySettingsRoute = '/security-settings';
   static const String firebaseTestRoute = '/firebase-test';
   
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -39,6 +51,18 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SignInScreen());
       case homeRoute:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case mainNavigationRoute:
+        return MaterialPageRoute(builder: (_) => const MainNavigationScreen());
+      case profileRoute:
+        return MaterialPageRoute(builder: (_) => const ProfileScreen());
+      case accountSettingsRoute:
+        return MaterialPageRoute(builder: (_) => const AccountSettingsScreen());
+      case notificationSettingsRoute:
+        return MaterialPageRoute(builder: (_) => const NotificationSettingsScreen());
+      case rushHourSettingsRoute:
+        return MaterialPageRoute(builder: (_) => const RushHourSettingsScreen());
+      case securitySettingsRoute:
+        return MaterialPageRoute(builder: (_) => const SecuritySettingsScreen());
       case firebaseTestRoute:
         return MaterialPageRoute(builder: (_) => const FirebaseTestWidget());
       default:

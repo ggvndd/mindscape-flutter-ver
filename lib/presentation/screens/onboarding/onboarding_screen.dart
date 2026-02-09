@@ -86,30 +86,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       decoration: BoxDecoration(
         color: page.backgroundColor,
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Top section with step indicator
-            if (!page.isWelcome)
-              Padding(
-                padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
-                child: _buildStepIndicator(page.stepText, isTablet),
-              ),
-            
-            // Main content - takes available space
-            Expanded(
-              child: page.isWelcome 
-                ? _buildWelcomeContent(page, isTablet)
-                : _buildStepContent(page, isTablet),
+      child: Column(
+        children: [
+          // Top section with step indicator
+          SafeArea(
+            bottom: false,
+            child: !page.isWelcome
+                ? Padding(
+                    padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
+                    child: _buildStepIndicator(page.stepText, isTablet),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          
+          // Main content - takes available space
+          Expanded(
+            child: page.isWelcome 
+              ? SafeArea(
+                  bottom: false,
+                  child: _buildWelcomeContent(page, isTablet),
+                )
+              : _buildStepContent(page, isTablet),
+          ),
+          
+          // Bottom section with white container for step screens
+          if (!page.isWelcome) 
+            _buildBottomContainer(page, index, isLastPage, isTablet)
+          else 
+            SafeArea(
+              top: false,
+              child: _buildWelcomeButton(isLastPage, index, isTablet),
             ),
-            
-            // Bottom section with white container for step screens
-            if (!page.isWelcome) 
-              _buildBottomContainer(page, index, isLastPage, isTablet)
-            else 
-              _buildWelcomeButton(isLastPage, index, isTablet),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -238,23 +246,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Login link (only on last page)
           if (isLastPage) ...[
             const SizedBox(height: 16),
-            RichText(
-              text: TextSpan(
-                style: GoogleFonts.urbanist(
-                  fontSize: isTablet ? 16 : 14,
-                  color: const Color(0xFF666666),
-                ),
-                children: [
-                  const TextSpan(text: 'Sudah memiliki akun? '),
-                  TextSpan(
-                    text: 'Masuk Sekarang',
-                    style: GoogleFonts.urbanist(
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFF8C00),
-                      decoration: TextDecoration.underline,
-                    ),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/sign-in'),
+              child: RichText(
+                text: TextSpan(
+                  style: GoogleFonts.urbanist(
+                    fontSize: isTablet ? 16 : 14,
+                    color: const Color(0xFF666666),
                   ),
-                ],
+                  children: [
+                    const TextSpan(text: 'Sudah memiliki akun? '),
+                    TextSpan(
+                      text: 'Masuk Sekarang',
+                      style: GoogleFonts.urbanist(
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFFF8C00),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

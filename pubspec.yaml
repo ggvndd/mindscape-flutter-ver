@@ -41,6 +41,7 @@ dependencies:
   animations: ^2.0.8
   flutter_staggered_animations: ^1.1.1
   google_fonts: ^6.1.0
+  flutter_svg: ^2.0.10+1
   
   # Charts & Data Visualization
   fl_chart: ^0.65.0
@@ -80,3 +81,5 @@ flutter:
   assets:
     - assets/images/
     - assets/logos/
+    - assets/logos/taskbar/
+    - assets/logos/profile/

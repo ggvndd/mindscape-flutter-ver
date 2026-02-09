@@ -51,7 +51,7 @@ class _SignUpSuccessScreenState extends State<SignUpSuccessScreen>
   }
 
   void _continueToHome() {
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/main');
   }
 
   void _goToSignIn() {
