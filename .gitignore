@@ -49,6 +49,7 @@ app.*.map.json
 # API Keys and Credentials (IMPORTANT - NEVER COMMIT THESE)
 *.json
 lib/core/config/api_keys.dart
+lib/core/config/api_config.dart
 lib/core/config/credentials.dart
 service-account-key.json
 google-services.json

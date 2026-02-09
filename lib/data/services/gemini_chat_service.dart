@@ -109,7 +109,7 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
       final model = isComplex ? _geminiPro : _geminiFlash;
       
       if (ApiConfig.enableLogging) {
-        print('Using ${isComplex ? 'Gemini Pro' : 'Gemini Flash'} for: ${message.substring(0, 50)}...');
+        print('Using ${isComplex ? 'Gemma 12B (Quality)' : 'Gemma 4B (Fast)'} for: ${message.substring(0, 50)}...');
       }
       
       // Build context for Gemini
@@ -157,7 +157,7 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
       'pro_test': {'success': false, 'response_time': 0, 'error': null},
     };
     
-    // Test Gemini Flash
+    // Test Gemma 4B (Fast model)
     try {
       final stopwatch = Stopwatch()..start();
       final flashResponse = await _geminiFlash.generateContent([
@@ -174,22 +174,22 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
       };
       
       if (ApiConfig.enableLogging) {
-        print('✅ Gemini Flash connectivity test passed (${stopwatch.elapsedMilliseconds}ms)');
+        print('✅ Gemma 4B connectivity test passed (${stopwatch.elapsedMilliseconds}ms)');
       }
       
     } catch (e) {
       results['flash_test']['error'] = e.toString();
       if (ApiConfig.enableLogging) {
-        print('❌ Gemini Flash connectivity test failed: $e');
+        print('❌ Gemma 4B connectivity test failed: $e');
       }
     }
     
-    // Test Gemini Pro
+    // Test Gemma 12B (Quality model)
     try {
       final stopwatch = Stopwatch()..start();
       final proResponse = await _geminiPro.generateContent([
         Content.text('Test connectivity untuk model Pro. Respond dengan empati dalam bahasa Indonesia casual.')
-      ]).timeout(const Duration(seconds: 15));
+      ]).timeout(const Duration(seconds: 30));
       
       stopwatch.stop();
       
@@ -201,13 +201,13 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
       };
       
       if (ApiConfig.enableLogging) {
-        print('✅ Gemini Pro connectivity test passed (${stopwatch.elapsedMilliseconds}ms)');
+        print('✅ Gemma 12B connectivity test passed (${stopwatch.elapsedMilliseconds}ms)');
       }
       
     } catch (e) {
       results['pro_test']['error'] = e.toString();
       if (ApiConfig.enableLogging) {
-        print('❌ Gemini Pro connectivity test failed: $e');
+        print('❌ Gemma 12B connectivity test failed: $e');
       }
     }
     

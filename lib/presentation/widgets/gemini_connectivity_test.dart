@@ -235,9 +235,9 @@ class _GeminiConnectivityTestState extends State<GeminiConnectivityTest> {
     
     return Column(
       children: [
-        _buildModelTestResult('Gemini Flash', flashTest),
+        _buildModelTestResult('Gemma 4B (Fast)', flashTest),
         const SizedBox(height: 8),
-        _buildModelTestResult('Gemini Pro', proTest),
+        _buildModelTestResult('Gemma 12B (Quality)', proTest),
         const SizedBox(height: 12),
         Text(
           'Last tested: ${_formatTimestamp(results['timestamp'])}',

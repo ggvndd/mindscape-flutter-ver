@@ -318,7 +318,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildImage(String imagePath, bool isTablet) {
-    final double scaleFactor = 5.0; // Change this value (e.g., 0.8, 1.2, 1.5)
+    final double scaleFactor = 15.0; // Change this value (e.g., 0.8, 1.2, 1.5)
     final maxSize = (isTablet ? 400.0 : 280.0) * scaleFactor;
     
     return Container(
