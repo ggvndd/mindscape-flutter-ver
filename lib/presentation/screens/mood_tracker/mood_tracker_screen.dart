@@ -1,0 +1,702 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import '../../../core/services/mood_service.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../domain/entities/mood.dart';
+import '../../widgets/mood_logging_dialog.dart';
+
+/// Mood Tracker screen showing mood logging and analytics
+class MoodTrackerScreen extends StatefulWidget {
+  const MoodTrackerScreen({super.key});
+
+  @override
+  State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
+}
+
+class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
+  final MoodService _moodService = MoodService();
+  final AuthService _authService = AuthService();
+  
+  int _mindScore = 60;
+  List<Map<String, dynamic>> _weeklyMoodData = [];
+  Map<String, Mood?> _dailyMoodData = {};
+  bool _isLoading = true;
+  DateTime _currentWeekStart = DateTime.now();
+  DateTime _selectedDate = DateTime.now();
+  String _selectedInterval = 'Mingguan';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWeekStart();
+    _loadData();
+  }
+
+  void _initializeWeekStart() {
+    final now = DateTime.now();
+    // Set to Monday of current week
+    _currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
+    _currentWeekStart = DateTime(_currentWeekStart.year, _currentWeekStart.month, _currentWeekStart.day);
+    _selectedDate = now;
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Load mindscore
+      final mindscore = await _moodService.calculateMindscore(user.uid);
+      
+      // Load weekly data
+      final weeklyData = await _moodService.getWeeklyMoodData(
+        userId: user.uid,
+        startDate: _currentWeekStart,
+      );
+      
+      // Load daily data
+      final dailyData = await _moodService.getDailyMoods(
+        userId: user.uid,
+        date: _selectedDate,
+      );
+
+      setState(() {
+        _mindScore = mindscore;
+        _weeklyMoodData = weeklyData;
+        _dailyMoodData = dailyData;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal memuat data: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _logMood() {
+    showMoodLoggingDialog(
+      context,
+      onMoodLogged: () {
+        _loadData(); // Refresh data after logging
+      },
+    );
+  }
+
+  void _openMindscoreDetail() {
+    // TODO: Navigate to mindscore detail page
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mindscore Detail'),
+        content: const Text('Mindscore analytics page coming soon!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getMoodIconPath(String mood) {
+    return 'assets/logos/moods/$mood.svg';
+  }
+
+  void _showIntervalDropdown() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Pilih Interval',
+              style: GoogleFonts.urbanist(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF3D2914),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildDropdownOption('Harian', () {
+              Navigator.pop(context);
+              // TODO: Update to daily view
+            }),
+            _buildDropdownOption('Mingguan', () {
+              Navigator.pop(context);
+              // TODO: Update to weekly view
+            }),
+            _buildDropdownOption('Bulanan', () {
+              Navigator.pop(context);
+              // TODO: Update to monthly view
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showHarianDropdown() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Pilih Tanggal',
+              style: GoogleFonts.urbanist(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF3D2914),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildDropdownOption('Senin, 1 Januari', () {
+              Navigator.pop(context);
+              // TODO: Update to selected date
+            }),
+            _buildDropdownOption('Selasa, 2 Januari', () {
+              Navigator.pop(context);
+              // TODO: Update to selected date
+            }),
+            _buildDropdownOption('Rabu, 3 Januari', () {
+              Navigator.pop(context);
+              // TODO: Update to selected date
+            }),
+            _buildDropdownOption('Kamis, 4 Januari', () {
+              Navigator.pop(context);
+              // TODO: Update to selected date
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownOption(String text, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F3F0),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          text,
+          style: GoogleFonts.urbanist(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF3D2914),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final timeFormat = DateFormat('HH:mm');
+    final dateFormat = DateFormat('d MMMM yyyy');
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F3F0),
+      body: SafeArea(
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFFA8B475),
+                ),
+              )
+            : SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back button
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: Color(0xFF3D2914),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Title
+              Text(
+                'Mood Tracker',
+                style: GoogleFonts.urbanist(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF3D2914),
+                ),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              // Subtitle
+              Text(
+                'Lihat mood kamu berdasarkan timeline yang kamu inginkan!',
+                style: GoogleFonts.urbanist(
+                  fontSize: 16,
+                  color: const Color(0xFF666666),
+                  height: 1.5,
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Log Mood Card
+              _buildLogMoodCard(timeFormat.format(now)),
+              
+              const SizedBox(height: 16),
+              
+              // Mindscore Card
+              _buildMindscoreCard(),
+              
+              const SizedBox(height: 24),
+              
+              // Mood Tracker Interval
+              _buildMoodTrackerInterval(),
+              
+              const SizedBox(height: 24),
+              
+              // Mood Tracker Harian
+              _buildMoodTrackerHarian(dateFormat),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogMoodCard(String currentTime) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFA8B475),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Log Moodmu Sekarang!',
+            style: GoogleFonts.urbanist(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Sekarang Jam $currentTime',
+            style: GoogleFonts.urbanist(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _logMood,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Text(
+                'Catat',
+                style: GoogleFonts.urbanist(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3D2914),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMindscoreCard() {
+    return GestureDetector(
+      onTap: _openMindscoreDetail,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: Color(0xFFA8B475),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  'assets/logos/mindscore.svg',
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mindscore',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF3D2914),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Check out your overall moodscore here.',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 14,
+                      color: const Color(0xFF666666),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '$_mindScore',
+              style: GoogleFonts.urbanist(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF3D2914),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              Icons.chevron_right,
+              color: Color(0xFF3D2914),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoodTrackerInterval() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Mood Tracker Interval',
+                style: GoogleFonts.urbanist(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3D2914),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  _showIntervalDropdown();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F3F0),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        _selectedInterval,
+                        style: GoogleFonts.urbanist(
+                          fontSize: 14,
+                          color: const Color(0xFF3D2914),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      SvgPicture.asset(
+                        'assets/logos/dropdown.svg',
+                        width: 16,
+                        height: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Bar chart
+          SizedBox(
+            height: 200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: _weeklyMoodData.map((data) {
+                final score = data['score'] as int;
+                final height = (score / 100) * 180;
+                
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: height,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFA8B475),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      data['day'],
+                      style: GoogleFonts.urbanist(
+                        fontSize: 12,
+                        color: const Color(0xFF666666),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              '${DateFormat('d').format(_currentWeekStart)}-${DateFormat('d MMMM yyyy').format(_currentWeekStart.add(const Duration(days: 6)))}',
+              style: GoogleFonts.urbanist(
+                fontSize: 12,
+                color: const Color(0xFF666666),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '1 Januari',
+                style: GoogleFonts.urbanist(
+                  fontSize: 12,
+                  color: const Color(0xFF666666),
+                ),
+              ),
+              Text(
+                '7 Januari',
+                style: GoogleFonts.urbanist(
+                  fontSize: 12,
+                  color: const Color(0xFF666666),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoodTrackerHarian(DateFormat dateFormat) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Mood Tracker Harian',
+                style: GoogleFonts.urbanist(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF3D2914),
+                ),
+              ),
+              Flexible(
+                child: GestureDetector(
+                  onTap: () {
+                    _showHarianDropdown();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F3F0),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            DateFormat('E, d MMM').format(_selectedDate),
+                            style: GoogleFonts.urbanist(
+                              fontSize: 14,
+                              color: const Color(0xFF3D2914),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        SvgPicture.asset(
+                          'assets/logos/dropdown.svg',
+                          width: 16,
+                          height: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Mood icons with times
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: _dailyMoodData.entries.map((entry) {
+              final time = entry.key;
+              final mood = entry.value;
+              
+              return Column(
+                children: [
+                  SvgPicture.asset(
+                    mood != null ? _getMoodIconPath(mood.mood) : 'assets/logos/moods/fine.svg',
+                    width: 32,
+                    height: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    time,
+                    style: GoogleFonts.urbanist(
+                      fontSize: 12,
+                      color: const Color(0xFF999999),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}

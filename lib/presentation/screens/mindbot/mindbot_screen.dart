@@ -15,26 +15,8 @@ class MindbotScreen extends StatefulWidget {
 class _MindbotScreenState extends State<MindbotScreen> {
   // Mock chat topics - TODO: Replace with actual data from Firestore
   final List<Map<String, dynamic>> _chatTopics = [
-    {
-      'title': 'Chat Topic A',
-      'date': DateTime(2026, 2, 5),
-      'id': '1',
-    },
-    {
-      'title': 'Chat Topic B',
-      'date': DateTime(2026, 2, 3),
-      'id': '2',
-    },
-    {
-      'title': 'Chat Topic C',
-      'date': DateTime(2026, 1, 28),
-      'id': '3',
-    },
-    {
-      'title': 'Chat Topic D',
-      'date': DateTime(2026, 1, 25),
-      'id': '4',
-    },
+    // Empty for now - will be populated from Firestore
+    // When user has chats, they'll appear here
   ];
 
   void _startNewChat() {
@@ -161,21 +143,24 @@ class _MindbotScreenState extends State<MindbotScreen> {
             
             const SizedBox(height: 24),
             
-            // Chat history list
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                itemCount: _chatTopics.length,
-                itemBuilder: (context, index) {
-                  final chat = _chatTopics[index];
-                  return _buildChatTopicCard(
-                    chat['title'],
-                    chat['date'],
-                    chat['id'],
-                  );
-                },
-              ),
-            ),
+            // Chat history list - only show if user has chats
+            if (_chatTopics.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  itemCount: _chatTopics.length,
+                  itemBuilder: (context, index) {
+                    final chat = _chatTopics[index];
+                    return _buildChatTopicCard(
+                      chat['title'],
+                      chat['date'],
+                      chat['id'],
+                    );
+                  },
+                ),
+              )
+            else
+              const Spacer(),
           ],
         ),
       ),

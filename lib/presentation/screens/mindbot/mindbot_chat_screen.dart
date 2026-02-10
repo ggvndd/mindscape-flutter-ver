@@ -233,10 +233,14 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF5F3F0),
                         borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.transparent,
+                          width: 0,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -316,7 +320,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                   ),
                   child: Center(
                     child: SvgPicture.asset(
-                      'assets/logos/chatbot/Vector.svg',
+                      'assets/logos/chatbot/Vector-1.svg',
                       width: 16,
                       height: 16,
                       colorFilter: const ColorFilter.mode(
@@ -336,7 +340,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                   color: const Color(0xFF3D2914),
                 ),
               ),
-              const SizedBox(width: 120),
+              const SizedBox(width: 8),
               Text(
                 timeFormat.format(message.timestamp),
                 style: GoogleFonts.urbanist(

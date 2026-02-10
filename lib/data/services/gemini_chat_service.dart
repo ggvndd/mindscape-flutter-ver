@@ -21,7 +21,7 @@ class GeminiChatService {
   }) : _geminiFlash = GenerativeModel(
          model: ApiConfig.geminiFlashModel,
          apiKey: ApiConfig.geminiApiKey,
-         systemInstruction: Content.text(customSystemPrompt ?? _defaultSystemPrompt),
+         // Note: Gemma models don't support systemInstruction, so we prepend it to messages
          generationConfig: GenerationConfig(
            temperature: 0.7,
            topK: 40,
@@ -38,7 +38,7 @@ class GeminiChatService {
        _geminiPro = GenerativeModel(
          model: ApiConfig.geminiProModel,
          apiKey: ApiConfig.geminiApiKey,
-         systemInstruction: Content.text(customSystemPrompt ?? _defaultSystemPrompt),
+         // Note: Gemma models don't support systemInstruction, so we prepend it to messages
          generationConfig: GenerationConfig(
            temperature: 0.7,
            topK: 40,
@@ -452,6 +452,10 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
   ) {
     final buffer = StringBuffer();
     
+    // Add system prompt first (Gemma models don't support systemInstruction)
+    buffer.writeln(_systemPrompt);
+    buffer.writeln('\n' + '='*50);
+    
     // Add recent mood context
     if (recentMoods != null && recentMoods.isNotEmpty) {
       buffer.writeln('\n=== Recent Mood Context ===');
@@ -478,6 +482,10 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
   
   String _buildMoodContextPrompt(MoodEntry moodEntry, List<MoodEntry> moodHistory) {
     final buffer = StringBuffer();
+    
+    // Add system prompt first
+    buffer.writeln(_systemPrompt);
+    buffer.writeln('\n' + '='*50);
     
     buffer.writeln('User just registered quick mood: ${moodEntry.moodType.label}');
     if (moodEntry.description != null) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../home/home_screen.dart';
 import '../profile/profile_screen.dart';
 import '../mindbot/mindbot_screen.dart';
+import '../mood_tracker/mood_tracker_screen.dart';
 import '../../widgets/navigation/bottom_nav_bar.dart';
 
 /// Main navigation screen with bottom navigation bar
@@ -18,7 +19,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // Screens for each tab
   final List<Widget> _screens = [
     const HomeScreen(),
-    const PlaceholderScreen(title: 'Mood Tracker'),
+    const MoodTrackerScreen(),
     const MindbotScreen(),
     const ProfileScreen(),
   ];
