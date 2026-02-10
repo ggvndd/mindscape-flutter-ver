@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -231,7 +232,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildInfoRow('Email', _userData!['email'] ?? 'N/A'),
                           _buildInfoRow(
                             'Bergabung pada', 
-                            _userData!['createdAt']?.toDate()?.toString().substring(0, 19) ?? 'N/A'
+                            _userData!['createdAt'] != null 
+                              ? DateFormat('d MMMM yyyy, HH:mm', 'id_ID').format(_userData!['createdAt'].toDate())
+                              : 'N/A'
                           ),
                           if (_userData!['preferences'] != null) ...[
                             const Divider(height: 24),

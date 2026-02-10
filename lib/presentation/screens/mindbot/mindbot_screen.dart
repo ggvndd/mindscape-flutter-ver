@@ -168,7 +168,7 @@ class _MindbotScreenState extends State<MindbotScreen> {
   }
 
   Widget _buildChatTopicCard(String title, DateTime date, String id) {
-    final dateFormat = DateFormat('dd/MM/yyyy');
+    final dateFormat = DateFormat('dd/MM/yyyy', 'id_ID');
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

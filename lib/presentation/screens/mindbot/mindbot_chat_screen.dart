@@ -121,8 +121,8 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('d MMMM, HH:mm');
-    final timeFormat = DateFormat('HH.mm');
+    final dateFormat = DateFormat('d MMMM, HH:mm', 'id_ID');
+    final timeFormat = DateFormat('HH.mm', 'id_ID');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F3F0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/auth_service.dart';
 
 /// Splash screen with MindScape logo
 class SplashScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  final AuthService _authService = AuthService();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -49,9 +51,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Wait a bit more to show the logo
     await Future.delayed(const Duration(milliseconds: 1000));
     
-    // Navigate to onboarding
+    // Check authentication state
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/onboarding');
+      final user = _authService.currentUser;
+      if (user != null) {
+        // User is logged in, go directly to main navigation
+        Navigator.pushReplacementNamed(context, '/main');
+      } else {
+        // User is not logged in, go to onboarding
+        Navigator.pushReplacementNamed(context, '/onboarding');
+      }
     }
   }
   

@@ -3,7 +3,6 @@ import '../../domain/entities/mood.dart';
 
 class MoodService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _moodsCollection = 'moods';
 
   // Log a new mood
   Future<void> logMood({
@@ -22,7 +21,11 @@ class MoodService {
         note: note,
       );
 
-      await _firestore.collection(_moodsCollection).add(moodData.toFirestore());
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('moods')
+          .add(moodData.toFirestore());
     } catch (e) {
       throw Exception('Failed to log mood: $e');
     }
@@ -36,8 +39,9 @@ class MoodService {
   }) async {
     try {
       final querySnapshot = await _firestore
-          .collection(_moodsCollection)
-          .where('userId', isEqualTo: userId)
+          .collection('users')
+          .doc(userId)
+          .collection('moods')
           .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('timestamp', descending: false)
@@ -167,8 +171,9 @@ class MoodService {
   Future<Mood?> getLatestMood(String userId) async {
     try {
       final querySnapshot = await _firestore
-          .collection(_moodsCollection)
-          .where('userId', isEqualTo: userId)
+          .collection('users')
+          .doc(userId)
+          .collection('moods')
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
@@ -206,9 +211,14 @@ class MoodService {
   }
 
   // Delete a mood
-  Future<void> deleteMood(String moodId) async {
+  Future<void> deleteMood(String userId, String moodId) async {
     try {
-      await _firestore.collection(_moodsCollection).doc(moodId).delete();
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('moods')
+          .doc(moodId)
+          .delete();
     } catch (e) {
       throw Exception('Failed to delete mood: $e');
     }
@@ -216,6 +226,7 @@ class MoodService {
 
   // Update a mood
   Future<void> updateMood({
+    required String userId,
     required String moodId,
     String? mood,
     String? note,
@@ -233,7 +244,12 @@ class MoodService {
       }
 
       if (updates.isNotEmpty) {
-        await _firestore.collection(_moodsCollection).doc(moodId).update(updates);
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('moods')
+            .doc(moodId)
+            .update(updates);
       }
     } catch (e) {
       throw Exception('Failed to update mood: $e');

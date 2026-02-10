@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 import 'app/app.dart';
 import 'core/utils/context_detector.dart';
@@ -17,6 +18,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Initialize Indonesian locale for date formatting
+  await initializeDateFormatting('id_ID', null);
   
   // Initialize local storage
   await LocalStorageService.initialize();
