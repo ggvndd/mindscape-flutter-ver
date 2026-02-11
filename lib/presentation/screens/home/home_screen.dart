@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/mood_service.dart';
+import '../../../domain/entities/mood.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Home screen that shows after successful authentication
@@ -14,13 +17,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
+  final MoodService _moodService = MoodService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
+  int _mindScore = 0;
+  Mood? _latestMood;
+  List<Map<String, dynamic>> _weeklyMoodData = [];
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadMoodData();
   }
 
   Future<void> _loadUserData() async {
@@ -34,6 +42,32 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadMoodData() async {
+    try {
+      final userId = _authService.currentUser?.uid;
+      if (userId == null) return;
+
+      final mindScore = await _moodService.calculateMindscore(userId);
+      final latestMood = await _moodService.getLatestMood(userId);
+      
+      // Calculate the start of the week (7 days ago)
+      final now = DateTime.now();
+      final weekStart = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
+      final weeklyData = await _moodService.getWeeklyMoodData(
+        userId: userId,
+        startDate: weekStart,
+      );
+
+      setState(() {
+        _mindScore = mindScore;
+        _latestMood = latestMood;
+        _weeklyMoodData = weeklyData;
+      });
+    } catch (e) {
+      // Handle error silently
     }
   }
 
@@ -98,260 +132,748 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F3F0),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'MindScape',
-          style: GoogleFonts.urbanist(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF3D2914),
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _signOut,
-            icon: const Icon(
-              Icons.logout,
-              color: Color(0xFF3D2914),
-            ),
-          ),
-        ],
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(isTablet ? 32.0 : 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Welcome Section
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF3D2914).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                color: Color(0xFF3D2914),
-                                size: 30,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Selamat Datang!',
-                                    style: GoogleFonts.urbanist(
-                                      fontSize: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    user?.displayName ?? 'Pengguna',
-                                    style: GoogleFonts.urbanist(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF3D2914),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Email: ${user?.email ?? 'Tidak tersedia'}',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+          : Column(
+              children: [
+                // Top Profile Section with Brown Background
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF3D2914),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // User Data Section
-                  if (_userData != null) ...[
-                    Text(
-                      'Data Profil',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF3D2914),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoRow('User ID', _userData!['uid'] ?? 'N/A'),
-                          _buildInfoRow('Nama', _userData!['displayName'] ?? 'N/A'),
-                          _buildInfoRow('Email', _userData!['email'] ?? 'N/A'),
-                          _buildInfoRow(
-                            'Bergabung pada', 
-                            _userData!['createdAt'] != null 
-                              ? DateFormat('d MMMM yyyy, HH:mm', 'id_ID').format(_userData!['createdAt'].toDate())
-                              : 'N/A'
+                          // Date and notification
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(DateTime.now()),
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 12,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Icon(
+                                  Icons.notifications_outlined,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
                           ),
-                          if (_userData!['preferences'] != null) ...[
-                            const Divider(height: 24),
-                            Text(
-                              'Preferensi',
-                              style: GoogleFonts.urbanist(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF3D2914),
+                          const SizedBox(height: 16),
+                          // Profile row
+                          Row(
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(35),
+                                ),
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 35,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            if (_userData!['preferences']['rushHourStart'] != null)
-                              _buildInfoRow(
-                                'Rush Hour Start',
-                                _userData!['preferences']['rushHourStart']
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hai, ${user?.displayName ?? 'Pengguna'}!',
+                                      style: GoogleFonts.urbanist(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.pie_chart,
+                                          size: 16,
+                                          color: const Color(0xFFA8B475),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '$_mindScore%',
+                                          style: GoogleFonts.urbanist(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        if (_latestMood != null) ...[
+                                          SvgPicture.asset(
+                                            'assets/logos/moods/mood_${_latestMood!.mood}.svg',
+                                            width: 16,
+                                            height: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _latestMood!.getMoodDisplayName(),
+                                            style: GoogleFonts.urbanist(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            if (_userData!['preferences']['rushHourEnd'] != null)
-                              _buildInfoRow(
-                                'Rush Hour End',
-                                _userData!['preferences']['rushHourEnd']
-                              ),
-                          ],
+                            ],
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
-                  ],
-                  
-                  // Quick Actions
-                  Text(
-                    'Aksi Cepat',
-                    style: GoogleFonts.urbanist(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF3D2914),
+                  ),
+                ),
+                
+                // Scrollable content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Metriks Kesehatan Mental Kamu
+                        Text(
+                          'Metriks Kesehatan Mental Kamu',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(child: _buildMindscoreCard()),
+                            const SizedBox(width: 12),
+                            Expanded(child: _buildCurrentMoodCard()),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Grafik Mood
+                        Text(
+                          'Grafik Mood',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildMoodGraph(),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // MindBot
+                        Text(
+                          'Mindbot: Teman Kamu Curhat',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildMindBotCard(),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Mindful Resources and Tips
+                        Text(
+                          'Mindful Resources and Tips',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildTipsSection(),
+                        
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildMindscoreCard() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/mood-tracker');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFA8B475),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.psychology,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Mindscore',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Circular progress indicator
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: CircularProgressIndicator(
+                      value: _mindScore / 100,
+                      strokeWidth: 12,
+                      backgroundColor: Colors.white.withOpacity(0.3),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: _buildActionCard(
-                          'Catat Mood',
-                          Icons.mood,
-                          () => _showComingSoon('Catat Mood'),
+                      Text(
+                        '$_mindScore',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildActionCard(
-                          'Lihat Riwayat',
-                          Icons.history,
-                          () => _showComingSoon('Lihat Riwayat'),
+                      Text(
+                        _getMoodLevel(_mindScore),
+                        style: GoogleFonts.urbanist(
+                          fontSize: 14,
+                          color: Colors.white,
                         ),
                       ),
                     ],
                   ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Debug Info
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Firebase Connection Status: ✅ Connected',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.green[700],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Authentication: ${user != null ? '✅ Authenticated' : '❌ Not Authenticated'}',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 14,
-                            color: user != null ? Colors.green[700] : Colors.red[700],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => Navigator.pushNamed(context, '/firebase-test'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[600],
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            icon: const Icon(Icons.science, size: 16),
-                            label: Text(
-                              'Run Firebase Tests',
-                              style: GoogleFonts.urbanist(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Learn More',
+                style: GoogleFonts.urbanist(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFA8B475),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getMoodLevel(int score) {
+    if (score <= 20) return 'Gloomy';
+    if (score <= 40) return 'Sad';
+    if (score <= 60) return 'Okay';
+    if (score <= 80) return 'Fine';
+    if (score <= 99) return 'Happy';
+    return 'Cheerful';
+  }
+
+  Widget _buildCurrentMoodCard() {
+    String moodName = 'N/A';
+    String moodIcon = 'assets/logos/moods/mood_justokay.svg';
+    
+    if (_latestMood != null) {
+      moodName = _latestMood!.getMoodDisplayName();
+      moodIcon = 'assets/logos/moods/mood_${_latestMood!.mood}.svg';
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/mood-tracker');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE89A5D),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.emoji_emotions,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Mood Sekarang',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Large mood icon
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(60),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: SvgPicture.asset(
+                moodIcon,
+                width: 80,
+                height: 80,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Learn More',
+                style: GoogleFonts.urbanist(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFFE89A5D),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoodGraph() {
+    if (_weeklyMoodData.isEmpty) {
+      return Container(
+        height: 340,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Belum ada data mood',
+            style: GoogleFonts.urbanist(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final now = DateTime.now();
+    final startDate = now.subtract(const Duration(days: 6));
+    final dateRangeText = '${startDate.day}-${now.day} ${DateFormat('MMMM yyyy', 'id_ID').format(now)}';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Mood Tracker Interval',
+                style: GoogleFonts.urbanist(
+                  fontSize: 14,
+                  color: const Color(0xFF666666),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F3F0),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      'Mingguan',
+                      style: GoogleFonts.urbanist(
+                        fontSize: 12,
+                        color: const Color(0xFF3D2914),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 16,
+                      color: Color(0xFF3D2914),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 220,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: _weeklyMoodData.map((data) {
+                final score = data['score'] as int;
+                final height = (score / 100) * 160;
+                
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '$score',
+                      style: GoogleFonts.urbanist(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF3D2914),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: 32,
+                      height: height,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFA8B475),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      data['day'],
+                      style: GoogleFonts.urbanist(
+                        fontSize: 12,
+                        color: const Color(0xFF666666),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              dateRangeText,
+              style: GoogleFonts.urbanist(
+                fontSize: 12,
+                color: const Color(0xFF666666),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Date range slider representation
+          Row(
+            children: [
+              Text(
+                '${startDate.day} ${DateFormat('MMMM', 'id_ID').format(startDate)}',
+                style: GoogleFonts.urbanist(
+                  fontSize: 11,
+                  color: const Color(0xFF999999),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 2,
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFCCCCCC), Color(0xFF999999)],
+                    ),
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ),
+              Text(
+                '${now.day} ${DateFormat('MMMM', 'id_ID').format(now)}',
+                style: GoogleFonts.urbanist(
+                  fontSize: 11,
+                  color: const Color(0xFF999999),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMindBotCard() {
+    return GestureDetector(
+      onTap: () {
+        // Navigate to MindBot tab (index 2)
+        DefaultTabController.of(context)?.animateTo(2);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              '1245',
+              style: GoogleFonts.urbanist(
+                fontSize: 48,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFFA8B475),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Conversations',
+              style: GoogleFonts.urbanist(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF3D2914),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Mau cerita ke Mindbot? Boleh banget!',
+              style: GoogleFonts.urbanist(
+                fontSize: 14,
+                color: const Color(0xFF666666),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3D2914),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Text(
+                'Mulai',
+                style: GoogleFonts.urbanist(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTipsSection() {
+    final tips = [
+      {
+        'tag': 'Insights Harian',
+        'question': 'Why do people self-sabotage themself?',
+      },
+      {
+        'tag': 'Istirahat Mindful',
+        'question': 'Why do people self-sabotage themself?',
+      },
+      {
+        'tag': 'Insights Harian',
+        'question': 'How to manage stress effectively?',
+      },
+      {
+        'tag': 'Istirahat Mindful',
+        'question': 'What are the benefits of meditation?',
+      },
+    ];
+
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: tips.length,
+        itemBuilder: (context, index) {
+          final tip = tips[index];
+          return Container(
+            width: 240,
+            margin: EdgeInsets.only(right: index < tips.length - 1 ? 12 : 0),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F3F0),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.lightbulb_outline,
+                        size: 14,
+                        color: Color(0xFF666666),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        tip['tag']!,
+                        style: GoogleFonts.urbanist(
+                          fontSize: 11,
+                          color: const Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Text(
+                    tip['question']!,
+                    style: GoogleFonts.urbanist(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF3D2914),
+                      height: 1.4,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF3D2914),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Baca',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

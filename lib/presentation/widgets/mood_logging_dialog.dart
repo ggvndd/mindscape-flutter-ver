@@ -182,7 +182,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SvgPicture.asset(
-                            'assets/logos/moods/${mood['name']}.svg',
+                            'assets/logos/moods/mood_${mood['name']}.svg',
                             width: 48,
                             height: 48,
                           ),
