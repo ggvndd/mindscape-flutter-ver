@@ -7,6 +7,7 @@ import '../../../core/services/auth_service.dart';
 import '../../../domain/entities/mood.dart';
 import '../../widgets/mood_logging_dialog.dart';
 import '../../../testing/seed_mood_data.dart';
+import 'mindscore_detail_screen.dart';
 
 /// Mood Tracker screen showing mood logging and analytics
 class MoodTrackerScreen extends StatefulWidget {
@@ -140,18 +141,10 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 
   void _openMindscoreDetail() {
-    // TODO: Navigate to mindscore detail page
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Mindscore Detail'),
-        content: const Text('Mindscore analytics page coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MindscoreDetailScreen(),
       ),
     );
   }
@@ -597,13 +590,13 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
           const SizedBox(height: 24),
           // Bar chart
           SizedBox(
-            height: 200,
+            height: 220,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: _weeklyMoodData.map((data) {
                 final score = data['score'] as int;
-                final height = (score / 100) * 180;
+                final height = (score / 100) * 160;
                 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
