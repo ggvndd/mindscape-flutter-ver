@@ -707,14 +707,15 @@ class _HomeScreenState extends State<HomeScreen> {
         DefaultTabController.of(context)?.animateTo(2);
       },
       child: Container(
-        padding: const EdgeInsets.all(24),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
-              blurRadius: 8,
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -724,41 +725,43 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               '1245',
               style: GoogleFonts.urbanist(
-                fontSize: 48,
+                fontSize: 64,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFFA8B475),
+                height: 1,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               'Conversations',
               style: GoogleFonts.urbanist(
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF3D2914),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               'Mau cerita ke Mindbot? Boleh banget!',
               style: GoogleFonts.urbanist(
-                fontSize: 14,
+                fontSize: 16,
                 color: const Color(0xFF666666),
+                height: 1.4,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 28),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
               decoration: BoxDecoration(
                 color: const Color(0xFF3D2914),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
               ),
               child: Text(
                 'Mulai',
                 style: GoogleFonts.urbanist(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),

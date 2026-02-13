@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Onboarding flow with PageView for smooth navigation
@@ -19,7 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Selamat Datang ke',
       subtitle: 'Mindscape!',
       description: 'Personal companion kamu buat\ncek mood kamu selagi sibuk!',
-      imagePath: 'assets/images/selamat datang image.png',
+      imagePath: 'assets/images/selamat datang image.svg',
       backgroundColor: const Color(0xFFF5F3F0), // Warm beige
       isWelcome: true,
     ),
@@ -28,7 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Mood Tracker Buat Kamu',
       subtitle: 'Yang Sibuk Side Gig',
       description: '',
-      imagePath: 'assets/images/sibuk image.png',
+      imagePath: 'assets/images/sibuk image.svg',
       backgroundColor: const Color(0xFFE8F0E8), // Light green
       isWelcome: false,
     ),
@@ -37,7 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Chatbot yang Paham',
       subtitle: 'Struggle Kamu',
       description: '',
-      imagePath: 'assets/images/struggle image.png',
+      imagePath: 'assets/images/struggle image.svg',
       backgroundColor: const Color(0xFFFDF5E6), // Warm yellow
       isWelcome: false,
     ),
@@ -46,7 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Tips-Tips untuk',
       subtitle: 'Mengelola Burnout-mu!',
       description: '',
-      imagePath: 'assets/images/burnout image.png',
+      imagePath: 'assets/images/burnout image.svg',
       backgroundColor: const Color(0xFFF0E8FF), // Light purple
       isWelcome: false,
     ),
@@ -138,6 +139,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               color: const Color(0xFF3D2914),
             ),
           ),
+          const SizedBox(height: 20),
+          
+          // Logo in brown container
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3D2914),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SvgPicture.asset(
+              'assets/logos/logo small.svg',
+              width: isTablet ? 48 : 40,
+              height: isTablet ? 48 : 40,
+            ),
+          ),
+          
           const SizedBox(height: 16),
           Text(
             page.description,
@@ -150,12 +167,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           
           // Image
-          _buildImage(page.imagePath, isTablet),
+          _buildImage(page.imagePath, isTablet, scaleFactor: 0.8),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           
           // Feature icons
           _buildFeatureIcons(isTablet),
@@ -170,7 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 24.0),
       child: Center(
-        child: _buildImage(page.imagePath, isTablet),
+        child: _buildImage(page.imagePath, isTablet, scaleFactor: 1.8),
       ),
     );
   }
@@ -317,8 +334,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildImage(String imagePath, bool isTablet) {
-    final double scaleFactor = 15.0; // Change this value (e.g., 0.8, 1.2, 1.5)
+  Widget _buildImage(String imagePath, bool isTablet, {double scaleFactor = 0.8}) {
     final maxSize = (isTablet ? 400.0 : 280.0) * scaleFactor;
     
     return Container(
@@ -326,11 +342,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         maxHeight: maxSize,
         maxWidth: maxSize,
       ),
-      child: Image.asset(
+      child: SvgPicture.asset(
         imagePath,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          // Fallback illustration when image is not found
+        placeholderBuilder: (context) {
+          // Fallback illustration when image is loading or not found
           return Container(
             width: isTablet ? 250 : 200,
             height: isTablet ? 250 : 200,

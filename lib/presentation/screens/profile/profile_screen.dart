@@ -179,6 +179,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               title: 'Security',
                               onTap: () => Navigator.pushNamed(context, '/security-settings'),
                             ),
+                            
+                            // Logout button
+                            _buildLogoutButton(context),
 
                             const SizedBox(height: 32),
 
@@ -261,6 +264,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Icon(
                 Icons.chevron_right,
                 color: Color(0xFF3D2914),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12, top: 12),
+      child: InkWell(
+        onTap: () async {
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(
+                'Sign Out',
+                style: GoogleFonts.urbanist(fontWeight: FontWeight.w600),
+              ),
+              content: Text(
+                'Apakah Anda yakin ingin keluar?',
+                style: GoogleFonts.urbanist(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(
+                    'Batal',
+                    style: GoogleFonts.urbanist(color: Colors.grey[600]),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(
+                    'Keluar',
+                    style: GoogleFonts.urbanist(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          if (confirm == true && mounted) {
+            try {
+              await _authService.signOut();
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/sign-in');
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Gagal sign out: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            }
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFEBEE),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFFEF5350),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.logout,
+                size: 24,
+                color: Color(0xFFEF5350),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Log Out',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFEF5350),
+                  ),
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: Color(0xFFEF5350),
               ),
             ],
           ),

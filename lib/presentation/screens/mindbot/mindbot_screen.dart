@@ -93,7 +93,7 @@ class _MindbotScreenState extends State<MindbotScreen> {
               ),
             ),
             
-            // New chat card
+            // New chat card at top
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Container(
@@ -143,24 +143,31 @@ class _MindbotScreenState extends State<MindbotScreen> {
             
             const SizedBox(height: 24),
             
-            // Chat history list - only show if user has chats
-            if (_chatTopics.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  itemCount: _chatTopics.length,
-                  itemBuilder: (context, index) {
-                    final chat = _chatTopics[index];
-                    return _buildChatTopicCard(
-                      chat['title'],
-                      chat['date'],
-                      chat['id'],
-                    );
-                  },
-                ),
-              )
-            else
-              const Spacer(),
+            // Chat history list below green card
+            Expanded(
+              child: _chatTopics.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Belum ada riwayat chat',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 16,
+                          color: const Color(0xFF999999),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      itemCount: _chatTopics.length,
+                      itemBuilder: (context, index) {
+                        final chat = _chatTopics[index];
+                        return _buildChatTopicCard(
+                          chat['title'],
+                          chat['date'],
+                          chat['id'],
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),
