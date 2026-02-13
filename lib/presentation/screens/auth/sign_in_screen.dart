@@ -343,7 +343,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide(
-                          color: _emailError != null ? Colors.orange : const Color(0xFFA8B475),
+                          color: _emailError != null ? Colors.orange : Colors.grey.shade300,
                           width: 2,
                         ),
                       ),
@@ -441,8 +441,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFA8B475),
+                        borderSide: BorderSide(
+                          color: Colors.grey.shade300,
                           width: 2,
                         ),
                       ),

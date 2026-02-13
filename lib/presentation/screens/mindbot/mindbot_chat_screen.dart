@@ -5,6 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
 import '../../../core/services/gemini_chat_service.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/chat_storage_service.dart';
 
 /// Active chat screen with MindBot
 class MindbotChatScreen extends StatefulWidget {
@@ -26,11 +27,13 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final GeminiChatService _geminiService = GeminiChatService();
   final AuthService _authService = AuthService();
+  final ChatStorageService _chatStorage = ChatStorageService();
   
   late ChatSession _chatSession;
   List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _username;
+  String? _currentChatId;
 
   @override
   void initState() {
@@ -39,14 +42,31 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     _loadUsername();
   }
 
-  void _initializeChat() {
+  void _initializeChat() async {
     if (widget.isNewChat) {
       _chatSession = _geminiService.startNewChat();
-      // Start with an empty chat - MindBot will greet after first message
+      _currentChatId = null; // Will be created on first message
     } else {
-      // TODO: Load chat history from Firestore for existing chat
+      // Load existing chat from Firestore
+      _currentChatId = widget.chatId;
+      if (_currentChatId != null) {
+        await _loadChatHistory(_currentChatId!);
+      }
       _chatSession = _geminiService.startNewChat();
     }
+  }
+
+  Future<void> _loadChatHistory(String chatId) async {
+    final messages = await _chatStorage.loadMessages(chatId);
+    setState(() {
+      _messages = messages.map((msg) => ChatMessage(
+        text: msg['text'],
+        isUser: msg['isUser'],
+        timestamp: msg['timestamp'],
+        username: msg['username'],
+      )).toList();
+    });
+    _scrollToBottom();
   }
 
   Future<void> _loadUsername() async {
@@ -60,6 +80,17 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     final messageText = _messageController.text.trim();
     if (messageText.isEmpty || _isLoading) return;
 
+    // Create chat session on first message
+    if (_currentChatId == null) {
+      try {
+        _currentChatId = await _chatStorage.createChatSession(
+          firstMessage: messageText,
+        );
+      } catch (e) {
+        print('Error creating chat session: $e');
+      }
+    }
+
     setState(() {
       _messages.add(ChatMessage(
         text: messageText,
@@ -72,6 +103,20 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
 
     _messageController.clear();
     _scrollToBottom();
+
+    // Save user message to Firestore
+    if (_currentChatId != null) {
+      try {
+        await _chatStorage.saveMessage(
+          chatId: _currentChatId!,
+          text: messageText,
+          isUser: true,
+          username: _username,
+        );
+      } catch (e) {
+        print('Error saving user message: $e');
+      }
+    }
 
     try {
       final response = await _geminiService.sendMessage(_chatSession, messageText);
@@ -87,16 +132,45 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
       });
       
       _scrollToBottom();
+
+      // Save bot response to Firestore
+      if (_currentChatId != null) {
+        try {
+          await _chatStorage.saveMessage(
+            chatId: _currentChatId!,
+            text: response,
+            isUser: false,
+            username: 'Mindbot',
+          );
+        } catch (e) {
+          print('Error saving bot message: $e');
+        }
+      }
     } catch (e) {
+      final errorMessage = 'Waduh, ada error nih. Coba lagi ya!';
       setState(() {
         _messages.add(ChatMessage(
-          text: 'Waduh, ada error nih. Coba lagi ya!',
+          text: errorMessage,
           isUser: false,
           timestamp: DateTime.now(),
           username: 'Mindbot',
         ));
         _isLoading = false;
       });
+
+      // Save error message to Firestore
+      if (_currentChatId != null) {
+        try {
+          await _chatStorage.saveMessage(
+            chatId: _currentChatId!,
+            text: errorMessage,
+            isUser: false,
+            username: 'Mindbot',
+          );
+        } catch (e) {
+          print('Error saving error message: $e');
+        }
+      }
     }
   }
 

@@ -329,7 +329,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide(
-                          color: _nameError != null ? Colors.orange : const Color(0xFFA8B475),
+                          color: _nameError != null ? Colors.orange : Colors.grey.shade300,
                           width: 2,
                         ),
                       ),
@@ -420,7 +420,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide(
-                          color: _emailError != null ? Colors.orange : const Color(0xFFA8B475),
+                          color: _emailError != null ? Colors.orange : Colors.grey.shade300,
                           width: 2,
                         ),
                       ),
@@ -519,7 +519,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide(
-                          color: _passwordError != null ? Colors.orange : const Color(0xFFA8B475),
+                          color: _passwordError != null ? Colors.orange : Colors.grey.shade300,
                           width: 2,
                         ),
                       ),
@@ -618,7 +618,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide(
-                          color: _confirmPasswordError != null ? Colors.orange : const Color(0xFFA8B475),
+                          color: _confirmPasswordError != null ? Colors.orange : Colors.grey.shade300,
                           width: 2,
                         ),
                       ),

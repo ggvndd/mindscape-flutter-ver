@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'mindbot_chat_screen.dart';
+import '../../../core/services/chat_storage_service.dart';
 
 /// MindBot main screen showing chat history and option to start new chat
 class MindbotScreen extends StatefulWidget {
@@ -13,23 +14,43 @@ class MindbotScreen extends StatefulWidget {
 }
 
 class _MindbotScreenState extends State<MindbotScreen> {
-  // Mock chat topics - TODO: Replace with actual data from Firestore
-  final List<Map<String, dynamic>> _chatTopics = [
-    // Empty for now - will be populated from Firestore
-    // When user has chats, they'll appear here
-  ];
+  final ChatStorageService _chatStorage = ChatStorageService();
+  List<Map<String, dynamic>> _chatTopics = [];
+  bool _isLoading = true;
 
-  void _startNewChat() {
-    Navigator.push(
+  @override
+  void initState() {
+    super.initState();
+    _loadChatHistory();
+  }
+
+  Future<void> _loadChatHistory() async {
+    setState(() => _isLoading = true);
+    try {
+      final chats = await _chatStorage.loadChatSessions();
+      setState(() {
+        _chatTopics = chats;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading chat history: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _startNewChat() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const MindbotChatScreen(isNewChat: true),
       ),
     );
+    // Reload chat history when returning from new chat
+    _loadChatHistory();
   }
 
-  void _openChat(String chatId) {
-    Navigator.push(
+  void _openChat(String chatId) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MindbotChatScreen(
@@ -38,6 +59,8 @@ class _MindbotScreenState extends State<MindbotScreen> {
         ),
       ),
     );
+    // Reload chat history when returning from existing chat
+    _loadChatHistory();
   }
 
   @override
@@ -145,28 +168,32 @@ class _MindbotScreenState extends State<MindbotScreen> {
             
             // Chat history list below green card
             Expanded(
-              child: _chatTopics.isEmpty
-                  ? Center(
-                      child: Text(
-                        'Belum ada riwayat chat',
-                        style: GoogleFonts.urbanist(
-                          fontSize: 16,
-                          color: const Color(0xFF999999),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(
+                      color: Color(0xFFA8B475),
+                    ))
+                  : _chatTopics.isEmpty
+                      ? Center(
+                          child: Text(
+                            'Belum ada riwayat chat',
+                            style: GoogleFonts.urbanist(
+                              fontSize: 16,
+                              color: const Color(0xFF999999),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          itemCount: _chatTopics.length,
+                          itemBuilder: (context, index) {
+                            final chat = _chatTopics[index];
+                            return _buildChatTopicCard(
+                              chat['title'],
+                              chat['updatedAt'],
+                              chat['id'],
+                            );
+                          },
                         ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      itemCount: _chatTopics.length,
-                      itemBuilder: (context, index) {
-                        final chat = _chatTopics[index];
-                        return _buildChatTopicCard(
-                          chat['title'],
-                          chat['date'],
-                          chat['id'],
-                        );
-                      },
-                    ),
             ),
           ],
         ),
