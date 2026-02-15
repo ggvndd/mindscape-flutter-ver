@@ -606,22 +606,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: const Color(0xFFF5F3F0),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Mingguan',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 12,
-                        color: const Color(0xFF3D2914),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 16,
-                      color: Color(0xFF3D2914),
-                    ),
-                  ],
+                child: Text(
+                  dateRangeText,
+                  style: GoogleFonts.urbanist(
+                    fontSize: 12,
+                    color: const Color(0xFF3D2914),
+                  ),
                 ),
               ),
             ],

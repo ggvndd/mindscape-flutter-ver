@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import '../presentation/providers/adaptive_provider.dart';
 import '../core/constants/app_constants.dart';
@@ -17,6 +18,17 @@ class App extends StatelessWidget {
         return MaterialApp(
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
+          
+          // Localization
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('id', 'ID'), // Indonesian
+            Locale('en', 'US'), // English
+          ],
           
           // Adaptive theme based on user context
           theme: AppTheme.getTheme(adaptiveProvider.currentContext),

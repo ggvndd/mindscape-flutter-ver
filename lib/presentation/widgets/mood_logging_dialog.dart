@@ -20,6 +20,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
     with TickerProviderStateMixin {
   final MoodService _moodService = MoodService();
   final AuthService _authService = AuthService();
+  final TextEditingController _noteController = TextEditingController();
   
   int _selectedIndex = 2; // Default to "Just Okay" (middle)
   bool _isLogging = false;
@@ -123,6 +124,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   
   @override
   void dispose() {
+    _noteController.dispose();
     _circle1Controller.dispose();
     _circle2Controller.dispose();
     _circle3Controller.dispose();
@@ -143,7 +145,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       await _moodService.logMood(
         userId: user.uid,
         mood: _moods[_selectedIndex]['name'],
-        note: null,
+        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
       );
 
       if (mounted) {
@@ -294,59 +296,122 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
             
             // Main content
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Title
-                  Text(
-                    'How are you feeling\nthis day?',
-                    style: GoogleFonts.urbanist(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      height: 1.3,
-                    ),
-                    textAlign: TextAlign.center,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Title
+                      Text(
+                        'How are you feeling\nthis day?',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      // Emoji
+                      Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(70),
+                        ),
+                        padding: const EdgeInsets.all(20),
+                        child: SvgPicture.asset(
+                          'assets/logos/moods/mood_${currentMood['name']}.svg',
+                          width: 100,
+                          height: 100,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Mood label
+                      Text(
+                        currentMood['label'],
+                        style: GoogleFonts.urbanist(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Mood slider line with dots
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: _buildMoodSlider(),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Note input field
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Note',
+                              style: GoogleFonts.urbanist(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.95),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextField(
+                                controller: _noteController,
+                                maxLines: 2,
+                                maxLength: 200,
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 13,
+                                  color: const Color(0xFF3D2914),
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Tambahkan catatan (opsional)...',
+                                  hintStyle: GoogleFonts.urbanist(
+                                    fontSize: 13,
+                                    color: const Color(0xFF999999),
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.all(10),
+                                  counterStyle: GoogleFonts.urbanist(
+                                    fontSize: 11,
+                                    color: const Color(0xFF666666),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white.withOpacity(0.95),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  
-                  const SizedBox(height: 48),
-                  
-                  // Emoji
-                  Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(80),
-                    ),
-                    padding: const EdgeInsets.all(24),
-                    child: SvgPicture.asset(
-                      'assets/logos/moods/mood_${currentMood['name']}.svg',
-                      width: 112,
-                      height: 112,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Mood label
-                  Text(
-                    currentMood['label'],
-                    style: GoogleFonts.urbanist(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 48),
-                  
-                  // Mood slider line with dots
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: _buildMoodSlider(),
-                  ),
-                ],
+                ),
               ),
             ),
             
@@ -428,43 +493,48 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                     ),
                   ),
                   
-                  // Dots
-                  Positioned.fill(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: List.generate(dotCount, (index) {
-                        final isSelected = index == _selectedIndex;
-                        final isFilled = index <= _selectedIndex;
-                        
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-                          },
-                          child: Container(
-                            width: isSelected ? 28 : 20,
-                            height: isSelected ? 28 : 20,
-                            decoration: BoxDecoration(
-                              color: isFilled ? Colors.white : Colors.white.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(isSelected ? 14 : 10),
-                              border: isSelected
-                                  ? Border.all(color: Colors.white, width: 4)
-                                  : null,
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: Colors.white.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                ),
-                              ] : null,
-                            ),
+                  // Visible dots
+                  ...List.generate(dotCount, (index) {
+                    final isSelected = index == _selectedIndex;
+                    final isFilled = index <= _selectedIndex;
+                    final spacing = totalWidth / (dotCount - 1);
+                    final xPos = spacing * index;
+                    
+                    // Calculate Y position along the curve
+                    // Use same parabola formula as the line
+                    final progress = index / (dotCount - 1);
+                    final yOffset = -25 * (1 - (progress * 2 - 1) * (progress * 2 - 1)); // Smooth parabola
+                    
+                    return Positioned(
+                      left: xPos - (isSelected ? 14 : 10),
+                      top: 40 + yOffset - (isSelected ? 14 : 10),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                        },
+                        child: Container(
+                          width: isSelected ? 28 : 20,
+                          height: isSelected ? 28 : 20,
+                          decoration: BoxDecoration(
+                            color: isFilled ? Colors.white : Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(isSelected ? 14 : 10),
+                            border: isSelected
+                                ? Border.all(color: Colors.white, width: 4)
+                                : null,
+                            boxShadow: isSelected ? [
+                              BoxShadow(
+                                color: Colors.white.withOpacity(0.3),
+                                blurRadius: 8,
+                                spreadRadius: 2,
+                              ),
+                            ] : null,
                           ),
-                        );
-                      }),
-                    ),
-                  ),
+                        ),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -530,60 +600,41 @@ class CurvedLinePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final spacing = size.width / (totalDots - 1);
-    final curveHeight = 25.0; // Height of the curve upward
-    final centerY = size.height / 2;
-
-    // Create path for background (unfilled) curved line
-    final backgroundPath = Path();
-    backgroundPath.moveTo(0, centerY);
+    final baseY = size.height / 2;
     
-    for (int i = 0; i < totalDots - 1; i++) {
-      final x1 = spacing * i;
-      final x2 = spacing * (i + 1);
+    // Create smooth wave path
+    final backgroundPath = Path();
+    final filledPath = Path();
+    
+    // Generate smooth curve using more points for interpolation
+    final steps = 50;
+    for (int i = 0; i <= steps; i++) {
+      final t = i / steps;
+      final x = size.width * t;
       
-      // Use cubic bezier for smoother curves
-      final control1X = x1 + (spacing * 0.25);
-      final control1Y = centerY - (curveHeight * 0.9);
-      final control2X = x1 + (spacing * 0.75);
-      final control2Y = centerY - (curveHeight * 0.9);
+      // Smooth sine wave that dips in the middle
+      final angle = t * 3.14159; // 0 to PI for one wave
+      final yOffset = -25 * (1 - (t * 2 - 1) * (t * 2 - 1)); // Smooth parabola
+      final y = baseY + yOffset;
       
-      backgroundPath.cubicTo(
-        control1X,
-        control1Y,
-        control2X,
-        control2Y,
-        x2,
-        centerY,
-      );
+      if (i == 0) {
+        backgroundPath.moveTo(x, y);
+        if (selectedIndex > 0) {
+          filledPath.moveTo(x, y);
+        }
+      } else {
+        backgroundPath.lineTo(x, y);
+        
+        // Fill path up to selected dot
+        if (t <= (selectedIndex / (totalDots - 1))) {
+          filledPath.lineTo(x, y);
+        }
+      }
     }
     
     canvas.drawPath(backgroundPath, paint);
-
-    // Create path for filled curved line (up to selected index)
+    
     if (selectedIndex > 0) {
-      final filledPath = Path();
-      filledPath.moveTo(0, centerY);
-      
-      for (int i = 0; i < selectedIndex; i++) {
-        final x1 = spacing * i;
-        final x2 = spacing * (i + 1);
-        
-        // Use same cubic bezier for consistency
-        final control1X = x1 + (spacing * 0.25);
-        final control1Y = centerY - (curveHeight * 0.9);
-        final control2X = x1 + (spacing * 0.75);
-        final control2Y = centerY - (curveHeight * 0.9);
-        
-        filledPath.cubicTo(
-          control1X,
-          control1Y,
-          control2X,
-          control2Y,
-          x2,
-          centerY,
-        );
-      }
-      
       canvas.drawPath(filledPath, filledPaint);
     }
   }

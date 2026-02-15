@@ -175,26 +175,24 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Pilih Interval',
-              style: GoogleFonts.urbanist(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF3D2914),
+            Center(
+              child: Text(
+                'Pilih Interval',
+                style: GoogleFonts.urbanist(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF3D2914),
+                ),
               ),
             ),
             const SizedBox(height: 24),
-            _buildDropdownOption('Harian', () {
+            _buildDropdownOption('Mingguan', () async {
               Navigator.pop(context);
-              // TODO: Update to daily view
+              _showWeekPicker();
             }),
-            _buildDropdownOption('Mingguan', () {
+            _buildDropdownOption('Bulanan', () async {
               Navigator.pop(context);
-              // TODO: Update to weekly view
-            }),
-            _buildDropdownOption('Bulanan', () {
-              Navigator.pop(context);
-              // TODO: Update to monthly view
+              _showMonthPicker();
             }),
           ],
         ),
@@ -202,57 +200,61 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  void _showHarianDropdown() {
-    showModalBottomSheet(
+  void _showWeekPicker() async {
+    final DateTime? picked = await showDatePicker(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Pilih Tanggal',
-              style: GoogleFonts.urbanist(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF3D2914),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildDropdownOption('Senin, 1 Januari', () {
-              Navigator.pop(context);
-              // TODO: Update to selected date
-            }),
-            _buildDropdownOption('Selasa, 2 Januari', () {
-              Navigator.pop(context);
-              // TODO: Update to selected date
-            }),
-            _buildDropdownOption('Rabu, 3 Januari', () {
-              Navigator.pop(context);
-              // TODO: Update to selected date
-            }),
-            _buildDropdownOption('Kamis, 4 Januari', () {
-              Navigator.pop(context);
-              // TODO: Update to selected date
-            }),
-          ],
-        ),
+      initialDate: _currentWeekStart,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      locale: const Locale('id', 'ID'),
+      helpText: 'Pilih hari pertama minggu',
+    );
+
+    if (picked != null) {
+      // Use the selected date as the start of the week (not Monday)
+      final normalizedWeekStart = DateTime(picked.year, picked.month, picked.day);
+      
+      setState(() {
+        _selectedInterval = 'Mingguan';
+        _currentWeekStart = normalizedWeekStart;
+      });
+      _loadData();
+    }
+  }
+
+  void _showMonthPicker() async {
+    final DateTime? picked = await showDialog<DateTime>(
+      context: context,
+      builder: (context) => _MonthPickerDialog(
+        initialDate: DateTime(_currentWeekStart.year, _currentWeekStart.month),
       ),
     );
+
+    if (picked != null) {
+      setState(() {
+        _selectedInterval = 'Bulanan';
+        // Set to first day of selected month
+        _currentWeekStart = DateTime(picked.year, picked.month, 1);
+      });
+      _loadData();
+    }
+  }
+
+  void _showHarianDropdown() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      locale: const Locale('id', 'ID'),
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+      _loadData();
+    }
   }
 
   Widget _buildDropdownOption(String text, VoidCallback onTap) {
@@ -763,6 +765,157 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             }).toList(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Custom month picker dialog
+class _MonthPickerDialog extends StatefulWidget {
+  final DateTime initialDate;
+
+  const _MonthPickerDialog({
+    Key? key,
+    required this.initialDate,
+  }) : super(key: key);
+
+  @override
+  State<_MonthPickerDialog> createState() => _MonthPickerDialogState();
+}
+
+class _MonthPickerDialogState extends State<_MonthPickerDialog> {
+  late int _selectedYear;
+  late int _selectedMonth;
+  final int _currentYear = DateTime.now().year;
+  final int _currentMonth = DateTime.now().month;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedYear = widget.initialDate.year;
+    _selectedMonth = widget.initialDate.month;
+  }
+
+  final List<String> _monthNames = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Year selector
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: _selectedYear > 2020
+                      ? () {
+                          setState(() {
+                            _selectedYear--;
+                          });
+                        }
+                      : null,
+                  color: const Color(0xFFA8B475),
+                ),
+                Text(
+                  '$_selectedYear',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF3D2914),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: _selectedYear < _currentYear
+                      ? () {
+                          setState(() {
+                            _selectedYear++;
+                          });
+                        }
+                      : null,
+                  color: const Color(0xFFA8B475),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Month grid
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: 12,
+              itemBuilder: (context, index) {
+                final month = index + 1;
+                final isDisabled = _selectedYear == _currentYear && month > _currentMonth;
+                final isSelected = month == _selectedMonth && _selectedYear == widget.initialDate.year;
+                
+                return InkWell(
+                  onTap: isDisabled
+                      ? null
+                      : () {
+                          Navigator.pop(
+                            context,
+                            DateTime(_selectedYear, month),
+                          );
+                        },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? const Color(0xFFA8B475)
+                          : isDisabled
+                              ? Colors.grey[200]
+                              : const Color(0xFFF5F3F0),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      _monthNames[index],
+                      style: GoogleFonts.urbanist(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? Colors.white
+                            : isDisabled
+                                ? Colors.grey[400]
+                                : const Color(0xFF3D2914),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            // Cancel button
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Batal',
+                style: GoogleFonts.urbanist(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF666666),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
