@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/app_lock_service.dart';
+import 'app_lock_setup_screen.dart';
+import 'change_password_screen.dart';
 
 /// Security settings screen for password and app lock management
 class SecuritySettingsScreen extends StatefulWidget {
@@ -13,146 +16,56 @@ class SecuritySettingsScreen extends StatefulWidget {
 
 class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
   final AuthService _authService = AuthService();
+  final AppLockService _appLockService = AppLockService();
   bool _appLockEnabled = false;
 
-  void _showChangePasswordDialog() {
-    final currentPasswordController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-    bool obscureCurrentPassword = true;
-    bool obscureNewPassword = true;
-    bool obscureConfirmPassword = true;
+  @override
+  void initState() {
+    super.initState();
+    _loadAppLockStatus();
+  }
 
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+  Future<void> _loadAppLockStatus() async {
+    final isEnabled = await _appLockService.isAppLockEnabled();
+    if (mounted) {
+      setState(() {
+        _appLockEnabled = isEnabled;
+      });
+    }
+  }
+
+  void _navigateToChangePassword() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChangePasswordScreen(),
+      ),
+    );
+  }
+
+  void _setupAppLock() async {
+    if (_appLockEnabled) {
+      // Show options to disable or change PIN
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            'Ganti Password',
+            'App Lock',
             style: GoogleFonts.urbanist(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF3D2914),
             ),
           ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Current Password
-                TextField(
-                  controller: currentPasswordController,
-                  obscureText: obscureCurrentPassword,
-                  style: GoogleFonts.urbanist(),
-                  decoration: InputDecoration(
-                    labelText: 'Password Saat Ini',
-                    labelStyle: GoogleFonts.urbanist(
-                      color: Colors.grey[600],
-                    ),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscureCurrentPassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setDialogState(() {
-                          obscureCurrentPassword = !obscureCurrentPassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFA8B475),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // New Password
-                TextField(
-                  controller: newPasswordController,
-                  obscureText: obscureNewPassword,
-                  style: GoogleFonts.urbanist(),
-                  decoration: InputDecoration(
-                    labelText: 'Password Baru',
-                    labelStyle: GoogleFonts.urbanist(
-                      color: Colors.grey[600],
-                    ),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscureNewPassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setDialogState(() {
-                          obscureNewPassword = !obscureNewPassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFA8B475),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Confirm Password
-                TextField(
-                  controller: confirmPasswordController,
-                  obscureText: obscureConfirmPassword,
-                  style: GoogleFonts.urbanist(),
-                  decoration: InputDecoration(
-                    labelText: 'Konfirmasi Password Baru',
-                    labelStyle: GoogleFonts.urbanist(
-                      color: Colors.grey[600],
-                    ),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscureConfirmPassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setDialogState(() {
-                          obscureConfirmPassword = !obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFFA8B475),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          content: Text(
+            'App Lock sudah aktif. Apa yang ingin kamu lakukan?',
+            style: GoogleFonts.urbanist(
+              fontSize: 14,
+              color: Colors.grey[600],
             ),
           ),
           actions: [
@@ -166,78 +79,45 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                 ),
               ),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () async {
-                // Validate passwords
-                if (newPasswordController.text != confirmPasswordController.text) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Password baru tidak cocok',
-                        style: GoogleFonts.urbanist(),
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                if (newPasswordController.text.length < 6) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Password minimal 6 karakter',
-                        style: GoogleFonts.urbanist(),
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                // TODO: Implement password change with Firebase
+                await _appLockService.removePin();
                 Navigator.pop(context);
+                _loadAppLockStatus();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Password berhasil diubah',
+                      'App Lock berhasil dinonaktifkan',
                       style: GoogleFonts.urbanist(),
                     ),
                     backgroundColor: Colors.green,
                   ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3D2914),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
               child: Text(
-                'Simpan',
+                'Nonaktifkan',
                 style: GoogleFonts.urbanist(
+                  color: Colors.red,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _setupAppLock() {
-    // TODO: Implement app lock setup (PIN/Biometric)
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Fitur App Lock akan segera tersedia',
-          style: GoogleFonts.urbanist(),
+      );
+    } else {
+      // Navigate to setup screen
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AppLockSetupScreen(),
         ),
-        backgroundColor: const Color(0xFFA8B475),
-      ),
-    );
+      );
+      
+      if (result == true) {
+        _loadAppLockStatus();
+      }
+    }
   }
 
   @override
@@ -313,7 +193,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
 
                     // Change Password Card
                     GestureDetector(
-                      onTap: _showChangePasswordDialog,
+                      onTap: _navigateToChangePassword,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -431,10 +311,10 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Atur Sekarang',
+                                    _appLockEnabled ? 'Aktif' : 'Atur Sekarang',
                                     style: GoogleFonts.urbanist(
                                       fontSize: 12,
-                                      color: const Color(0xFFA8B475),
+                                      color: _appLockEnabled ? Colors.green : const Color(0xFFA8B475),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

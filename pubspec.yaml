@@ -42,6 +42,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.10+1
+  flutter_markdown: ^0.6.22
   
   # Charts & Data Visualization
   fl_chart: ^0.65.0

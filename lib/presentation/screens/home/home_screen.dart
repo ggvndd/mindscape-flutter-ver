@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/mood_service.dart';
+import '../../../core/services/chat_storage_service.dart';
 import '../../../domain/entities/mood.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../mindbot/mindbot_screen.dart';
 
 /// Home screen that shows after successful authentication
 class HomeScreen extends StatefulWidget {
@@ -18,17 +20,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final AuthService _authService = AuthService();
   final MoodService _moodService = MoodService();
+  final ChatStorageService _chatStorage = ChatStorageService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
   int _mindScore = 0;
   Mood? _latestMood;
   List<Map<String, dynamic>> _weeklyMoodData = [];
+  int _conversationCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
     _loadMoodData();
+    _loadConversationCount();
   }
 
   Future<void> _loadUserData() async {
@@ -65,6 +70,17 @@ class _HomeScreenState extends State<HomeScreen> {
         _mindScore = mindScore;
         _latestMood = latestMood;
         _weeklyMoodData = weeklyData;
+      });
+    } catch (e) {
+      // Handle error silently
+    }
+  }
+
+  Future<void> _loadConversationCount() async {
+    try {
+      final chatSessions = await _chatStorage.loadChatSessions();
+      setState(() {
+        _conversationCount = chatSessions.length;
       });
     } catch (e) {
       // Handle error silently
@@ -703,8 +719,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMindBotCard() {
     return GestureDetector(
       onTap: () {
-        // Navigate to MindBot tab (index 2)
-        DefaultTabController.of(context)?.animateTo(2);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MindbotScreen(),
+          ),
+        ).then((_) {
+          // Reload conversation count when returning
+          _loadConversationCount();
+        });
       },
       child: Container(
         width: double.infinity,
@@ -723,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Text(
-              '1245',
+              '$_conversationCount',
               style: GoogleFonts.urbanist(
                 fontSize: 64,
                 fontWeight: FontWeight.w700,

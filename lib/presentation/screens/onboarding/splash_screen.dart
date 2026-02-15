@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/app_lock_service.dart';
+import '../profile/app_lock_verify_screen.dart';
 
 /// Splash screen with MindScape logo
 class SplashScreen extends StatefulWidget {
@@ -13,6 +16,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
+  final AppLockService _appLockService = AppLockService();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -55,8 +59,26 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     if (mounted) {
       final user = _authService.currentUser;
       if (user != null) {
-        // User is logged in, go directly to main navigation
-        Navigator.pushReplacementNamed(context, '/main');
+        // User is logged in, check if app lock is enabled
+        final isAppLockEnabled = await _appLockService.isAppLockEnabled();
+        
+        if (isAppLockEnabled) {
+          // Show app lock verification screen
+          final verified = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AppLockVerifyScreen(),
+            ),
+          );
+          
+          if (verified == true && mounted) {
+            // PIN verified, go to main navigation
+            Navigator.pushReplacementNamed(context, '/main');
+          }
+        } else {
+          // No app lock, go directly to main navigation
+          Navigator.pushReplacementNamed(context, '/main');
+        }
       } else {
         // User is not logged in, go to onboarding
         Navigator.pushReplacementNamed(context, '/onboarding');
@@ -102,32 +124,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: Image.asset(
-                          'assets/logos/Mindscape.png',
+                        child: SvgPicture.asset(
+                          'assets/logos/Mindscape.svg',
                           fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            // Fallback if image not found
-                            return Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    const Color(0xFF8B4513), // Brown
-                                    const Color(0xFF654321),
-                                  ],
-                                ),
+                          placeholderBuilder: (context) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  const Color(0xFF8B4513), // Brown
+                                  const Color(0xFF654321),
+                                ],
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.psychology,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.psychology,
+                                size: 60,
+                                color: Colors.white,
                               ),
-                            );
-                          },
+                            ),
+                          ),
                         ),
                       ),
                     ),
