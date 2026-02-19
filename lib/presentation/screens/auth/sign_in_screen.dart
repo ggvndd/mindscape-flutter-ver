@@ -317,6 +317,11 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _emailController,
                     focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
+                    style: GoogleFonts.urbanist(
+                      fontSize: 14,
+                      color: const Color(0xFF3D2914),
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Masukkan email anda!',
                       hintStyle: GoogleFonts.urbanist(
@@ -408,6 +413,11 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _passwordController,
                     focusNode: _passwordFocusNode,
                     obscureText: !_isPasswordVisible,
+                    style: GoogleFonts.urbanist(
+                      fontSize: 14,
+                      color: const Color(0xFF3D2914),
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Masukkan password anda',
                       hintStyle: GoogleFonts.urbanist(

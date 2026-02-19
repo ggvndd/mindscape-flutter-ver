@@ -6,7 +6,6 @@ import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../domain/entities/mood.dart';
 import '../../widgets/mood_logging_dialog.dart';
-import '../../../testing/seed_mood_data.dart';
 import 'mindscore_detail_screen.dart';
 
 /// Mood Tracker screen showing mood logging and analytics
@@ -98,46 +97,6 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         _loadData(); // Refresh data after logging
       },
     );
-  }
-
-  Future<void> _seedDummyData() async {
-    final user = _authService.currentUser;
-    if (user == null) return;
-
-    // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFA8B475)),
-      ),
-    );
-
-    try {
-      await seedMoodDataForUser(user.uid);
-      
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Dummy data berhasil ditambahkan! Refresh untuk melihat.'),
-            backgroundColor: Color(0xFFA8B475),
-            duration: Duration(seconds: 3),
-          ),
-        );
-        _loadData(); // Refresh the screen
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Close loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Gagal menambah data: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   void _openMindscoreDetail() {
@@ -319,37 +278,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               
               const SizedBox(height: 24),
               
-              // Title (Long press to seed dummy data)
-              GestureDetector(
-                onLongPress: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Seed Dummy Data'),
-                      content: const Text('Tambahkan data mood dummy untuk 30 hari terakhir? Ini akan membantu visualisasi chart.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Batal'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _seedDummyData();
-                          },
-                          child: const Text('Tambahkan'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                child: Text(
-                  'Mood Tracker',
-                  style: GoogleFonts.urbanist(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF3D2914),
-                  ),
+              Text(
+                'Mood Tracker',
+                style: GoogleFonts.urbanist(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF3D2914),
                 ),
               ),
               

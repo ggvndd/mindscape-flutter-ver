@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../domain/entities/mood.dart';
-import '../../../testing/seed_mood_data.dart';
 
 class MindscoreDetailScreen extends StatefulWidget {
   const MindscoreDetailScreen({super.key});
@@ -36,29 +35,6 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
     super.initState();
     _initializeAnimations();
     _loadData();
-    _seedDataIfEmpty();
-  }
-  
-  Future<void> _seedDataIfEmpty() async {
-    try {
-      final user = _authService.currentUser;
-      if (user == null) return;
-
-      // Check if user has any moods
-      final existingMoods = await _moodService.getMoodsByDateRange(
-        userId: user.uid,
-        startDate: DateTime.now().subtract(const Duration(days: 30)),
-        endDate: DateTime.now(),
-      );
-
-      // If no moods exist, seed dummy data
-      if (existingMoods.isEmpty) {
-        await seedMoodDataForUser(user.uid);
-        _loadData(); // Reload after seeding
-      }
-    } catch (e) {
-      // Silently fail - this is just for demo purposes
-    }
   }
   
   void _initializeAnimations() {
@@ -213,6 +189,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
     return Scaffold(
       backgroundColor: moodInfo['color'] as Color,
       body: SafeArea(
+        bottom: false,
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(color: Colors.white),
@@ -376,37 +353,47 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                   Expanded(
                     flex: 2,
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.2),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '$_mindscore',
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final circleSize = (constraints.maxHeight - 60).clamp(100.0, 180.0);
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: circleSize,
+                                height: circleSize,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                                child: Center(
+                                  child: FittedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Text(
+                                        '$_mindscore',
+                                        style: GoogleFonts.urbanist(
+                                          fontSize: 80,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                moodInfo['name'] as String,
                                 style: GoogleFonts.urbanist(
-                                  fontSize: 80,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            moodInfo['name'] as String,
-                            style: GoogleFonts.urbanist(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -438,7 +425,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Mood history section - separate container
                   Expanded(
@@ -507,7 +494,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                                     ),
                                   )
                                 : ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                                    padding: EdgeInsets.fromLTRB(24, 0, 24, MediaQuery.of(context).padding.bottom + 24),
                                     itemCount: _moodHistory.length > 4 ? 4 : _moodHistory.length,
                                     itemBuilder: (context, index) {
                                       return _buildMoodHistoryCard(_moodHistory[index]);
