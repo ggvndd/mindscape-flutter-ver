@@ -9,6 +9,7 @@ import 'presentation/providers/mood_provider.dart';
 import 'presentation/providers/adaptive_provider.dart';
 import 'presentation/providers/chat_provider.dart';
 import 'presentation/providers/user_provider.dart';
+import 'presentation/providers/rush_hour_provider.dart';
 import 'data/services/local_storage_service.dart';
 
 void main() async {
@@ -44,6 +45,7 @@ class MindscapeApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdaptiveProvider()),
         ChangeNotifierProvider(create: (_) => MoodProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => RushHourProvider()),
       ],
       child: const App(),
     );

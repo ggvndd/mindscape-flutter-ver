@@ -36,38 +36,38 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   final List<Map<String, dynamic>> _moods = [
     {
       'name': 'gloomy',
-      'display': 'Depressed',
-      'label': "I'm Feeling Depressed",
+      'display': 'Depresi',
+      'label': 'Aku Lagi Depresi',
       'color': Color(0xFF5B3A8E),
     },
     {
       'name': 'sad',
-      'display': 'Sad',
-      'label': "I'm Feeling Sad",
+      'display': 'Sedih',
+      'label': 'Aku Lagi Sedih',
       'color': Color(0xFFE89A5D),
     },
     {
       'name': 'justokay',
-      'display': 'Neutral',
-      'label': "I'm Feeling Neutral",
+      'display': 'Biasa Aja',
+      'label': 'Aku Biasa Aja',
       'color': Color(0xFFF5C77E),
     },
     {
       'name': 'fine',
-      'display': 'Happy',
-      'label': "I'm Feeling Happy",
+      'display': 'Senang',
+      'label': 'Aku Lagi Senang',
       'color': Color(0xFF8B7355),
     },
     {
       'name': 'happy',
-      'display': 'Overjoyed',
-      'label': "I'm Feeling Overjoyed",
+      'display': 'Sangat Senang',
+      'label': 'Aku Sangat Senang',
       'color': Color(0xFFA8B475),
     },
     {
       'name': 'cheerful',
-      'display': 'Cheerful',
-      'label': "I'm Feeling Cheerful",
+      'display': 'Ceria',
+      'label': 'Aku Lagi Ceria',
       'color': Color(0xFF7BA85B),
     },
   ];
@@ -304,7 +304,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                     children: [
                       // Title
                       Text(
-                        'How are you feeling\nthis day?',
+                        'Gimana perasaan\nkamu hari ini?',
                         style: GoogleFonts.urbanist(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
@@ -361,7 +361,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Note',
+                              'Catatan',
                               style: GoogleFonts.urbanist(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -443,7 +443,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Set Mood',
+                              'Simpan Mood',
                               style: GoogleFonts.urbanist(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

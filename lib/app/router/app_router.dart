@@ -13,6 +13,7 @@ import '../../presentation/screens/profile/account_settings_screen.dart';
 import '../../presentation/screens/profile/notification_settings_screen.dart';
 import '../../presentation/screens/profile/rush_hour_settings_screen.dart';
 import '../../presentation/screens/profile/security_settings_screen.dart';
+import '../../presentation/screens/rush_hour/rush_hour_mode_screen.dart';
 
 /// App routing configuration
 class AppRouter {
@@ -30,6 +31,7 @@ class AppRouter {
   static const String notificationSettingsRoute = '/notification-settings';
   static const String rushHourSettingsRoute = '/rush-hour-settings';
   static const String securitySettingsRoute = '/security-settings';
+  static const String rushHourModeRoute = '/rush-hour-mode';
   
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -61,6 +63,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const RushHourSettingsScreen());
       case securitySettingsRoute:
         return MaterialPageRoute(builder: (_) => const SecuritySettingsScreen());
+      case rushHourModeRoute:
+        return MaterialPageRoute(builder: (_) => const RushHourModeScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

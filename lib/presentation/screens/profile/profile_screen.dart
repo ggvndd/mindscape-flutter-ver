@@ -158,25 +158,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _buildMenuItem(
                               context,
                               icon: 'assets/logos/profile/account.svg',
-                              title: 'Account',
+                              title: 'Akun',
                               onTap: () => Navigator.pushNamed(context, '/account-settings'),
                             ),
                             _buildMenuItem(
                               context,
                               icon: 'assets/logos/profile/Frame 117.svg',
-                              title: 'Rush Hour Setup',
+                              title: 'Pengaturan Rush Hour',
                               onTap: () => Navigator.pushNamed(context, '/rush-hour-settings'),
                             ),
                             _buildMenuItem(
                               context,
                               icon: 'assets/logos/profile/Frame 118.svg',
-                              title: 'Notifications',
+                              title: 'Notifikasi',
                               onTap: () => Navigator.pushNamed(context, '/notification-settings'),
                             ),
                             _buildMenuItem(
                               context,
                               icon: 'assets/logos/profile/security.svg',
-                              title: 'Security',
+                              title: 'Keamanan',
                               onTap: () => Navigator.pushNamed(context, '/security-settings'),
                             ),
                             
@@ -187,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             // Privacy notice
                             Text(
-                              'Your data is safely stored by the developer and will not be used for anything else besides the thesis research.',
+                              'Data kamu disimpan dengan aman oleh pengembang dan tidak akan digunakan untuk hal lain selain penelitian skripsi.',
                               textAlign: TextAlign.center,
                               style: GoogleFonts.urbanist(
                                 fontSize: 12,
@@ -281,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context: context,
             builder: (context) => AlertDialog(
               title: Text(
-                'Sign Out',
+                'Keluar dari Akun',
                 style: GoogleFonts.urbanist(fontWeight: FontWeight.w600),
               ),
               content: Text(
@@ -356,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  'Log Out',
+                  'Keluar',
                   style: GoogleFonts.urbanist(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,

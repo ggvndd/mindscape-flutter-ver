@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/chat_storage_service.dart';
 import '../../../domain/entities/mood.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../mindbot/mindbot_screen.dart';
+import '../../providers/rush_hour_provider.dart';
+import '../rush_hour/rush_hour_mode_screen.dart';
 
 /// Home screen that shows after successful authentication
 class HomeScreen extends StatefulWidget {
@@ -92,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Sign Out',
+          'Keluar dari Akun',
           style: GoogleFonts.urbanist(fontWeight: FontWeight.w600),
         ),
         content: Text(
@@ -278,6 +281,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Rush Hour Banner (shown when rush hour is active)
+                        Consumer<RushHourProvider>(
+                          builder: (context, rushHourProvider, _) {
+                            if (!rushHourProvider.isRushHourActive) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              children: [
+                                _buildRushHourBanner(),
+                                const SizedBox(height: 24),
+                              ],
+                            );
+                          },
+                        ),
+
                         // Metriks Kesehatan Mental Kamu
                         Text(
                           'Metriks Kesehatan Mental Kamu',
@@ -326,9 +344,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         
                         const SizedBox(height: 24),
                         
-                        // Mindful Resources and Tips
+                        // Sumber & Tips Mindful
                         Text(
-                          'Mindful Resources and Tips',
+                          'Sumber & Tips Mindful',
                           style: GoogleFonts.urbanist(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -345,6 +363,87 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  // ── Rush Hour Banner ────────────────────────────────────────────────────
+
+  Widget _buildRushHourBanner() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const RushHourModeScreen()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF7A9B58),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF7A9B58).withOpacity(0.30),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Rush Hour Aktif!',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Kamu sedang dalam mode sibuk sekarang.',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.85),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RushHourModeScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF7A9B58),
+                elevation: 0,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                'Mulai Sekarang',
+                style: GoogleFonts.urbanist(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -435,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Learn More',
+                'Lihat Detail',
                 style: GoogleFonts.urbanist(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -450,12 +549,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getMoodLevel(int score) {
-    if (score <= 20) return 'Gloomy';
-    if (score <= 40) return 'Sad';
-    if (score <= 60) return 'Okay';
-    if (score <= 80) return 'Fine';
-    if (score <= 99) return 'Happy';
-    return 'Cheerful';
+    if (score <= 20) return 'Murung';
+    if (score <= 40) return 'Sedih';
+    if (score <= 60) return 'Lumayan';
+    if (score <= 80) return 'Oke';
+    if (score <= 99) return 'Senang';
+    return 'Ceria';
   }
 
   Widget _buildCurrentMoodCard() {
@@ -528,7 +627,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Learn More',
+                'Lihat Detail',
                 style: GoogleFonts.urbanist(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -746,7 +845,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Conversations',
+              'Percakapan',
               style: GoogleFonts.urbanist(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
@@ -789,19 +888,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final tips = [
       {
         'tag': 'Insights Harian',
-        'question': 'Why do people self-sabotage themself?',
+        'question': 'Kenapa orang suka self-sabotage dirinya sendiri?',
       },
       {
         'tag': 'Istirahat Mindful',
-        'question': 'Why do people self-sabotage themself?',
+        'question': 'Cara efektif mengelola stres saat sibuk',
       },
       {
         'tag': 'Insights Harian',
-        'question': 'How to manage stress effectively?',
+        'question': 'Bagaimana cara mengelola stres secara efektif?',
       },
       {
         'tag': 'Istirahat Mindful',
-        'question': 'What are the benefits of meditation?',
+        'question': 'Apa saja manfaat meditasi untuk kesehatan?',
       },
     ];
 

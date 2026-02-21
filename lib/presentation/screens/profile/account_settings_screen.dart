@@ -127,7 +127,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   children: [
                     // Title
                     Text(
-                      'Account Settings',
+                      'Pengaturan Akun',
                       style: GoogleFonts.urbanist(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,

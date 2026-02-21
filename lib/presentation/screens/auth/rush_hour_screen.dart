@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../core/services/auth_service.dart';
 
 /// Rush hour preferences screen
 class RushHourScreen extends StatefulWidget {
@@ -10,6 +11,9 @@ class RushHourScreen extends StatefulWidget {
 }
 
 class _RushHourScreenState extends State<RushHourScreen> {
+  final AuthService _authService = AuthService();
+  bool _isSaving = false;
+
   List<RushHourPeriod> _rushHourPeriods = [
     RushHourPeriod(
       startTime: const TimeOfDay(hour: 9, minute: 0),
@@ -73,13 +77,33 @@ class _RushHourScreenState extends State<RushHourScreen> {
     });
   }
 
-  void _continue() {
-    // Save rush hour preferences and continue
-    Navigator.pushReplacementNamed(context, '/sign-up-success');
+  Future<void> _continue() async {
+    setState(() => _isSaving = true);
+    try {
+      await _authService.saveRushHours(
+        _rushHourPeriods
+            .map((p) => {
+                  'start': {
+                    'hour': p.startTime.hour,
+                    'minute': p.startTime.minute
+                  },
+                  'end': {
+                    'hour': p.endTime.hour,
+                    'minute': p.endTime.minute
+                  },
+                })
+            .toList(),
+      );
+    } catch (_) {
+      // proceed even if save fails
+    }
+    if (mounted) {
+      setState(() => _isSaving = false);
+      Navigator.pushReplacementNamed(context, '/sign-up-success');
+    }
   }
 
   void _skip() {
-    // Skip rush hour setup
     Navigator.pushReplacementNamed(context, '/sign-up-success');
   }
 
@@ -180,7 +204,7 @@ class _RushHourScreenState extends State<RushHourScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _continue,
+                        onPressed: _isSaving ? null : _continue,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF3D2914),
                           foregroundColor: Colors.white,
@@ -190,13 +214,22 @@ class _RushHourScreenState extends State<RushHourScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: Text(
-                          'Lanjutkan',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Lanjutkan',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                   ],

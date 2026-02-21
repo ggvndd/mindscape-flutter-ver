@@ -80,15 +80,31 @@ class _MindbotScreenState extends State<MindbotScreen> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        border: Border.all(
+                            color: const Color(0xFF3D2914), width: 1.5),
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Color(0xFF3D2914),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/logos/back.svg',
+                            width: 20,
+                            height: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Kembali',
+                            style: GoogleFonts.urbanist(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF3D2914),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

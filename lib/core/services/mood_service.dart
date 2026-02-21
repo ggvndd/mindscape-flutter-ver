@@ -167,6 +167,59 @@ class MoodService {
     }
   }
 
+  // Get monthly mindscore data for the last 12 months
+  Future<List<Map<String, dynamic>>> getMonthlyMindscoreData({
+    required String userId,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      ];
+      List<Map<String, dynamic>> monthlyData = [];
+
+      for (int i = 11; i >= 0; i--) {
+        int targetMonth = now.month - i;
+        int targetYear = now.year;
+        while (targetMonth <= 0) {
+          targetMonth += 12;
+          targetYear--;
+        }
+
+        final monthStart = DateTime(targetYear, targetMonth, 1, 0, 0, 0);
+        final isLastDayNeeded = targetMonth == 12;
+        final monthEnd = isLastDayNeeded
+            ? DateTime(targetYear + 1, 1, 1).subtract(const Duration(seconds: 1))
+            : DateTime(targetYear, targetMonth + 1, 1).subtract(const Duration(seconds: 1));
+
+        final monthMoods = await getMoodsByDateRange(
+          userId: userId,
+          startDate: monthStart,
+          endDate: monthEnd,
+        );
+
+        final hasData = monthMoods.isNotEmpty;
+        int averageScore = 0;
+        if (hasData) {
+          final total = monthMoods.fold<int>(0, (sum, m) => sum + m.moodScore);
+          averageScore = (total / monthMoods.length).round();
+        }
+
+        monthlyData.add({
+          'month': monthNames[targetMonth - 1],
+          'year': targetYear,
+          'score': averageScore,
+          'hasData': hasData,
+        });
+      }
+
+      return monthlyData;
+    } catch (e) {
+      throw Exception('Failed to get monthly mindscore data: $e');
+    }
+  }
+
   // Get the most recent mood
   Future<Mood?> getLatestMood(String userId) async {
     try {

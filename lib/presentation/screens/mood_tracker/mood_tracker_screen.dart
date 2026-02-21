@@ -22,17 +22,27 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   
   int _mindScore = 60;
   List<Map<String, dynamic>> _weeklyMoodData = [];
+  List<Map<String, dynamic>> _monthlyMindscoreData = [];
   Map<String, Mood?> _dailyMoodData = {};
   bool _isLoading = true;
   DateTime _currentWeekStart = DateTime.now();
   DateTime _selectedDate = DateTime.now();
   String _selectedInterval = 'Mingguan';
+  late PageController _monthlyPageController;
+  int _monthlyPageIndex = 1;
 
   @override
   void initState() {
     super.initState();
+    _monthlyPageController = PageController(initialPage: 1);
     _initializeWeekStart();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _monthlyPageController.dispose();
+    super.dispose();
   }
 
   void _initializeWeekStart() {
@@ -99,6 +109,25 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
+  Future<void> _loadMonthlyData() async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) return;
+      setState(() => _isLoading = true);
+      final data = await _moodService.getMonthlyMindscoreData(userId: user.uid);
+      if (mounted) {
+        setState(() {
+          _monthlyMindscoreData = data;
+          _monthlyPageIndex = 1;
+          _isLoading = false;
+        });
+        _monthlyPageController.jumpToPage(1);
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _openMindscoreDetail() {
     Navigator.push(
       context,
@@ -113,29 +142,18 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 
   void _showIntervalDropdown() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: Text(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
                 'Pilih Interval',
                 style: GoogleFonts.urbanist(
                   fontSize: 20,
@@ -143,17 +161,18 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                   color: const Color(0xFF3D2914),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildDropdownOption('Mingguan', () async {
-              Navigator.pop(context);
-              _showWeekPicker();
-            }),
-            _buildDropdownOption('Bulanan', () async {
-              Navigator.pop(context);
-              _showMonthPicker();
-            }),
-          ],
+              const SizedBox(height: 24),
+              _buildDropdownOption('Mingguan', () {
+                Navigator.pop(context);
+                _showWeekPicker();
+              }),
+              _buildDropdownOption('Bulanan', () {
+                Navigator.pop(context);
+                setState(() => _selectedInterval = 'Bulanan');
+                _loadMonthlyData();
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -263,15 +282,29 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    border: Border.all(color: const Color(0xFF3D2914), width: 1.5),
                     borderRadius: BorderRadius.circular(24),
                   ),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Color(0xFF3D2914),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/logos/back.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Kembali',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF3D2914),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -524,82 +557,232 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          // Bar chart
-          SizedBox(
-            height: 220,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _weeklyMoodData.map((data) {
-                final score = data['score'] as int;
-                final height = (score / 100) * 160;
-                
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      '$score',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF3D2914),
+          // Chart: weekly or monthly based on selected interval
+          if (_selectedInterval == 'Bulanan') ...[  
+            _buildMonthlyChart(),
+          ] else ...[  
+            SizedBox(
+              height: 220,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _weeklyMoodData.map((data) {
+                  final score = data['score'] as int;
+                  final height = (score / 100) * 160;
+                  
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$score',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF3D2914),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 32,
-                      height: height,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFA8B475),
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 32,
+                        height: height,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFA8B475),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      data['day'],
-                      style: GoogleFonts.urbanist(
-                        fontSize: 12,
-                        color: const Color(0xFF666666),
+                      const SizedBox(height: 8),
+                      Text(
+                        data['day'],
+                        style: GoogleFonts.urbanist(
+                          fontSize: 12,
+                          color: const Color(0xFF666666),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              '${DateFormat('d', 'id_ID').format(_currentWeekStart)}-${DateFormat('d MMMM yyyy', 'id_ID').format(_currentWeekStart.add(const Duration(days: 6)))}',
-              style: GoogleFonts.urbanist(
-                fontSize: 12,
-                color: const Color(0xFF666666),
+                    ],
+                  );
+                }).toList(),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                DateFormat('d MMMM', 'id_ID').format(_currentWeekStart),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                '${DateFormat('d', 'id_ID').format(_currentWeekStart)}-${DateFormat('d MMMM yyyy', 'id_ID').format(_currentWeekStart.add(const Duration(days: 6)))}',
                 style: GoogleFonts.urbanist(
                   fontSize: 12,
                   color: const Color(0xFF666666),
                 ),
               ),
-              Text(
-                DateFormat('d MMMM', 'id_ID').format(_currentWeekStart.add(const Duration(days: 6))),
-                style: GoogleFonts.urbanist(
-                  fontSize: 12,
-                  color: const Color(0xFF666666),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('d MMMM', 'id_ID').format(_currentWeekStart),
+                  style: GoogleFonts.urbanist(
+                    fontSize: 12,
+                    color: const Color(0xFF666666),
+                  ),
                 ),
-              ),
-            ],
-          ),
+                Text(
+                  DateFormat('d MMMM', 'id_ID').format(_currentWeekStart.add(const Duration(days: 6))),
+                  style: GoogleFonts.urbanist(
+                    fontSize: 12,
+                    color: const Color(0xFF666666),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  Widget _buildMonthlyChart() {
+    if (_monthlyMindscoreData.isEmpty) {
+      return const SizedBox(
+        height: 100,
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFFA8B475)),
+        ),
+      );
+    }
+
+    final halves = [
+      _monthlyMindscoreData.take(6).toList(),
+      _monthlyMindscoreData.skip(6).toList(),
+    ];
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 220,
+          child: PageView.builder(
+            controller: _monthlyPageController,
+            itemCount: 2,
+            onPageChanged: (index) => setState(() => _monthlyPageIndex = index),
+            itemBuilder: (context, pageIndex) {
+              final months = halves[pageIndex];
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: months.map((data) {
+                  final score = data['score'] as int;
+                  final hasData = data['hasData'] as bool;
+                  final barHeight = hasData ? (score / 100) * 160.0 : 8.0;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (hasData)
+                        Text(
+                          '$score',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        ),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 32,
+                        height: barHeight < 8 ? 8 : barHeight,
+                        decoration: BoxDecoration(
+                          color: hasData ? const Color(0xFFA8B475) : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        data['month'] as String,
+                        style: GoogleFonts.urbanist(
+                          fontSize: 11,
+                          color: const Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _monthlyPageIndex > 0
+                  ? () => _monthlyPageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      )
+                  : null,
+              child: Icon(
+                Icons.chevron_left,
+                color: _monthlyPageIndex > 0
+                    ? const Color(0xFF3D2914)
+                    : Colors.grey[300],
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              children: List.generate(
+                2,
+                (i) => Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _monthlyPageIndex == i
+                        ? const Color(0xFFA8B475)
+                        : Colors.grey[300],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: _monthlyPageIndex < 1
+                  ? () => _monthlyPageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      )
+                  : null,
+              child: Icon(
+                Icons.chevron_right,
+                color: _monthlyPageIndex < 1
+                    ? const Color(0xFF3D2914)
+                    : Colors.grey[300],
+                size: 24,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            _getHalfYearLabel(_monthlyPageIndex),
+            style: GoogleFonts.urbanist(
+              fontSize: 12,
+              color: const Color(0xFF666666),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getHalfYearLabel(int halfIndex) {
+    if (_monthlyMindscoreData.isEmpty) return '';
+    final half = halfIndex == 0
+        ? _monthlyMindscoreData.take(6).toList()
+        : _monthlyMindscoreData.skip(6).toList();
+    if (half.isEmpty) return '';
+    return '${half.first['month']} ${half.first['year']} – '
+        '${half.last['month']} ${half.last['year']}';
   }
 
   Widget _buildMoodTrackerHarian(DateFormat dateFormat) {

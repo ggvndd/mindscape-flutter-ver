@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../domain/entities/mood.dart';
+import 'mood_history_screen.dart';
 
 class MindscoreDetailScreen extends StatefulWidget {
   const MindscoreDetailScreen({super.key});
@@ -324,15 +325,34 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                         GestureDetector(
                           onTap: () => Navigator.pop(context),
                           child: Container(
-                            width: 48,
-                            height: 48,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.8),
+                                  width: 1.5),
+                              borderRadius: BorderRadius.circular(24),
                             ),
-                            child: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/logos/back.svg',
+                                  width: 20,
+                                  height: 20,
+                                  colorFilter: const ColorFilter.mode(
+                                      Colors.white, BlendMode.srcIn),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Kembali',
+                                  style: GoogleFonts.urbanist(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -457,11 +477,11 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    // TODO: Navigate to full mood history screen
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Full mood history coming soon!'),
-                                        duration: Duration(seconds: 2),
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MoodHistoryScreen(),
                                       ),
                                     );
                                   },

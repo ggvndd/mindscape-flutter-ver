@@ -116,16 +116,48 @@ class _RushHourSettingsScreenState extends State<RushHourSettingsScreen> {
   }
 
   Future<void> _saveSettings() async {
-    // TODO: Implement save to Firestore
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Rush hour settings berhasil disimpan',
-          style: GoogleFonts.urbanist(),
-        ),
-        backgroundColor: Colors.green,
-      ),
-    );
+    setState(() => _isLoading = true);
+    try {
+      await _authService.saveRushHours(
+        _rushHourPeriods
+            .map((p) => {
+                  'start': {
+                    'hour': p.startTime.hour,
+                    'minute': p.startTime.minute
+                  },
+                  'end': {
+                    'hour': p.endTime.hour,
+                    'minute': p.endTime.minute
+                  },
+                })
+            .toList(),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Pengaturan rush hour berhasil disimpan',
+              style: GoogleFonts.urbanist(),
+            ),
+            backgroundColor: const Color(0xFFA8B475),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal menyimpan: ${e.toString()}',
+              style: GoogleFonts.urbanist(),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

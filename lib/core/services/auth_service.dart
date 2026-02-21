@@ -209,4 +209,16 @@ class AuthService {
 
     return query.snapshots();
   }
+
+  /// Saves the rush hour periods for the current user using a nested field path
+  /// so that other preferences fields are not overwritten.
+  Future<void> saveRushHours(List<Map<String, dynamic>> rushHours) async {
+    final user = currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    await _firestore.collection('users').doc(user.uid).update({
+      'preferences.rushHours': rushHours,
+      'lastUpdatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }
