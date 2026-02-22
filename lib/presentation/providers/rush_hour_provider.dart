@@ -42,8 +42,21 @@ class RushHourProvider extends ChangeNotifier {
   List<RushHourPeriod> get rushHourPeriods => _rushHourPeriods;
   bool get isLoading => _isLoading;
 
+  // ── Debug helper: set to true to force rush hour active without real time check ──
+  // ignore: unused_field
+  bool _debugForceActive = false;
+
+  /// Toggle debug mode (call from anywhere during testing)
+  // ignore: unused_element
+  void debugSetForceActive(bool value) {
+    _debugForceActive = value;
+    _popupShownForSession = false; // reset so popup triggers again
+    notifyListeners();
+  }
+
   /// Returns true if the current clock time falls within any configured rush hour
   bool get isRushHourActive {
+    if (_debugForceActive) return true;
     final now = TimeOfDay.now();
     final nowMinutes = now.hour * 60 + now.minute;
     for (final period in _rushHourPeriods) {

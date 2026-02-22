@@ -387,15 +387,85 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     );
   }
 
+  Widget _buildBotBubble(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: MarkdownBody(
+            data: text,
+            selectable: true,
+            styleSheet: MarkdownStyleSheet(
+              p: GoogleFonts.urbanist(
+                fontSize: 16,
+                color: const Color(0xFF3D2914),
+                height: 1.4,
+              ),
+              strong: GoogleFonts.urbanist(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF3D2914),
+              ),
+              em: GoogleFonts.urbanist(
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                color: const Color(0xFF3D2914),
+              ),
+              code: GoogleFonts.robotoMono(
+                fontSize: 14,
+                color: const Color(0xFF3D2914),
+                backgroundColor: const Color(0xFFF5F3F0),
+              ),
+              codeblockDecoration: BoxDecoration(
+                color: const Color(0xFFF5F3F0),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              blockquote: GoogleFonts.urbanist(
+                fontSize: 16,
+                color: const Color(0xFF666666),
+                fontStyle: FontStyle.italic,
+              ),
+              h1: GoogleFonts.urbanist(fontSize: 24, fontWeight: FontWeight.w700, color: const Color(0xFF3D2914)),
+              h2: GoogleFonts.urbanist(fontSize: 22, fontWeight: FontWeight.w700, color: const Color(0xFF3D2914)),
+              h3: GoogleFonts.urbanist(fontSize: 20, fontWeight: FontWeight.w600, color: const Color(0xFF3D2914)),
+              listBullet: GoogleFonts.urbanist(fontSize: 16, color: const Color(0xFF3D2914)),
+              a: GoogleFonts.urbanist(
+                fontSize: 16,
+                color: const Color(0xFFA8B475),
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMessageBubble(ChatMessage message, DateFormat timeFormat) {
+    // Split bot messages into separate paragraph bubbles
+    final paragraphs = message.isUser
+        ? <String>[message.text]
+        : message.text
+            .split('\n\n')
+            .map((p) => p.trim())
+            .where((p) => p.isNotEmpty)
+            .toList();
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
-        crossAxisAlignment: message.isUser
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
+        crossAxisAlignment:
+            message.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          // Username and timestamp
+          // Username and timestamp header
           Row(
             mainAxisAlignment: message.isUser
                 ? MainAxisAlignment.end
@@ -458,95 +528,42 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          // Message bubble
-          Align(
-            alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+          // Bubbles — one per paragraph for bot, single for user
+          if (message.isUser)
+            Align(
+              alignment: Alignment.centerRight,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75,
                 ),
-                decoration: BoxDecoration(
-                  color: message.isUser
-                      ? const Color(0xFFA8B475)
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFA8B475),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    message.text,
+                    style: GoogleFonts.urbanist(
+                      fontSize: 16,
+                      color: Colors.white,
+                      height: 1.4,
+                    ),
+                  ),
                 ),
-                child: message.isUser
-                    ? Text(
-                        message.text,
-                        style: GoogleFonts.urbanist(
-                          fontSize: 16,
-                          color: Colors.white,
-                          height: 1.4,
-                        ),
-                      )
-                    : MarkdownBody(
-                        data: message.text,
-                        selectable: true,
-                        styleSheet: MarkdownStyleSheet(
-                          p: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            color: const Color(0xFF3D2914),
-                            height: 1.4,
-                          ),
-                          strong: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          em: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            fontStyle: FontStyle.italic,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          code: GoogleFonts.robotoMono(
-                            fontSize: 14,
-                            color: const Color(0xFF3D2914),
-                            backgroundColor: const Color(0xFFF5F3F0),
-                          ),
-                          codeblockDecoration: BoxDecoration(
-                            color: const Color(0xFFF5F3F0),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          blockquote: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            color: const Color(0xFF666666),
-                            fontStyle: FontStyle.italic,
-                          ),
-                          h1: GoogleFonts.urbanist(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          h2: GoogleFonts.urbanist(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          h3: GoogleFonts.urbanist(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          listBullet: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            color: const Color(0xFF3D2914),
-                          ),
-                          a: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            color: const Color(0xFFA8B475),
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
               ),
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < paragraphs.length; i++) ...[
+                  _buildBotBubble(paragraphs[i]),
+                  if (i < paragraphs.length - 1) const SizedBox(height: 6),
+                ],
+              ],
             ),
-          ),
         ],
       ),
     );

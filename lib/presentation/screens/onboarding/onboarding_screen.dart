@@ -82,35 +82,60 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isLastPage = index == _pages.length - 1;
     final screenSize = MediaQuery.of(context).size;
     final isTablet = screenSize.width > 600;
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: page.backgroundColor,
-      ),
-      child: Column(
-        children: [
-          // Top section with step indicator
-          SafeArea(
-            bottom: false,
-            child: !page.isWelcome
-                ? Padding(
-                    padding: EdgeInsets.all(isTablet ? 32.0 : 24.0),
-                    child: _buildStepIndicator(page.stepText, isTablet),
-                  )
-                : const SizedBox(height: 20),
+
+    if (page.isWelcome) {
+      return Container(
+        decoration: BoxDecoration(color: page.backgroundColor),
+        child: Column(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: const SizedBox(height: 20),
+            ),
+            Expanded(
+              child: _buildWelcomeContent(page, isTablet),
+            ),
+            _buildBottomContainer(page, index, isLastPage, isTablet),
+          ],
+        ),
+      );
+    }
+
+    // Step pages – image in top portion with floating step indicator
+    final imageAreaHeight = screenSize.height * 0.58;
+    return Stack(
+      children: [
+        // Colored background
+        Container(color: page.backgroundColor),
+        // Image anchored to the top, constrained to ~58% of screen height
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: imageAreaHeight,
+          child: SvgPicture.asset(
+            page.imagePath,
+            fit: BoxFit.contain,
+            alignment: Alignment.bottomCenter,
           ),
-          
-          // Main content - takes available space
-          Expanded(
-            child: page.isWelcome 
-              ? _buildWelcomeContent(page, isTablet)
-              : _buildStepContent(page, isTablet),
+        ),
+        // Floating step indicator pill at the top
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: _buildStepIndicator(page.stepText, isTablet),
           ),
-          
-          // Bottom section with white container - consistent for all pages
-          _buildBottomContainer(page, index, isLastPage, isTablet),
-        ],
-      ),
+        ),
+        // Bottom white container anchored to the bottom
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: _buildBottomContainer(page, index, isLastPage, isTablet),
+        ),
+      ],
     );
   }
 
@@ -183,44 +208,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildStepContent(OnboardingData page, bool isTablet) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isTablet ? 32.0 : 24.0),
-      child: Center(
-        child: _buildImage(page.imagePath, isTablet, scaleFactor: 1.8),
-      ),
-    );
-  }
+  // _buildStepContent is no longer used — step pages now use a full-bleed Stack in _buildPage.
 
   Widget _buildBottomContainer(OnboardingData page, int index, bool isLastPage, bool isTablet) {
-    return SafeArea(
-      top: false,
-      bottom: false,  // Set to true to respect home indicator area, false to bleed to bottom edge
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.only(
-          left: isTablet ? 32 : 24,
-          right: isTablet ? 32 : 24,
-          top: isTablet ? 32 : 28,
-          bottom: isTablet ? 28 : 24,
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        left: isTablet ? 32 : 24,
+        right: isTablet ? 32 : 24,
+        top: isTablet ? 32 : 28,
+        bottom: (isTablet ? 28.0 : 24.0) + bottomInset,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, -2),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
             // Page indicators (dots)
             _buildPageIndicators(isTablet),
             SizedBox(height: isTablet ? 24 : 20),
@@ -280,9 +296,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
             ],
-          ],
         ),
-      ),
     );
   }
 

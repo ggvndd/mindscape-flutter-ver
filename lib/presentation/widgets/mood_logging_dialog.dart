@@ -269,24 +269,41 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
           SafeArea(
         child: Column(
           children: [
-            // Top bar with close button
+            // Top bar with back button
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: Colors.white.withOpacity(0.8), width: 1.5),
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 24,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/logos/back.svg',
+                            width: 20,
+                            height: 20,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Kembali',
+                            style: GoogleFonts.urbanist(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -481,6 +498,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
             SizedBox(
               height: 80,
               child: Stack(
+                clipBehavior: Clip.none,
                 children: [
                   // Custom painted curved line
                   Positioned.fill(
@@ -539,7 +557,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
               ),
             ),
             
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
             
             // Mini emoji indicators below dots
             Row(
