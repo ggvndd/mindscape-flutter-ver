@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/mood_service.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/notification_service.dart';
+import 'package:intl/intl.dart';
 
 class MoodLoggingDialog extends StatefulWidget {
   final Function? onMoodLogged;
@@ -24,6 +26,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   
   int _selectedIndex = 2; // Default to "Just Okay" (middle)
   bool _isLogging = false;
+  int _moodInterval = 3; // loaded from prefs
   
   late AnimationController _circle1Controller;
   late AnimationController _circle2Controller;
@@ -76,6 +79,12 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   void initState() {
     super.initState();
     _initializeAnimations();
+    _loadInterval();
+  }
+
+  Future<void> _loadInterval() async {
+    final interval = await NotificationService.getSavedInterval();
+    if (mounted) setState(() => _moodInterval = interval);
   }
   
   void _initializeAnimations() {
@@ -142,11 +151,86 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
         throw Exception('User not logged in');
       }
 
+      // Check if there's already a mood logged in the current interval window
+      final existingMood = await _moodService.getMoodInCurrentWindow(
+        user.uid,
+        _moodInterval,
+      );
+
+      if (existingMood != null && mounted) {
+        setState(() => _isLogging = false);
+        final timeLabel = DateFormat('HH:mm', 'id_ID')
+            .format(existingMood.timestamp);
+        final moodName = existingMood.mood;
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              'Sudah Ada Catatan Mood',
+              style: GoogleFonts.urbanist(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF3D2914),
+              ),
+            ),
+            content: Text(
+              'Kamu sudah mencatat mood "$moodName" tadi jam $timeLabel. '
+              'Kalau lanjut, catatan sebelumnya akan tetap ada dan ini akan jadi entri baru. Lanjutkan?',
+              style: GoogleFonts.urbanist(
+                fontSize: 14,
+                color: const Color(0xFF3D2914),
+                height: 1.5,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(
+                  'Batal',
+                  style: GoogleFonts.urbanist(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3D2914),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(
+                  'Tetap Catat',
+                  style: GoogleFonts.urbanist(
+                      fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+        setState(() => _isLogging = true);
+      }
+
+      final now = DateTime.now();
       await _moodService.logMood(
         userId: user.uid,
         mood: _moods[_selectedIndex]['name'],
-        note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        note: _noteController.text.trim().isEmpty
+            ? null
+            : _noteController.text.trim(),
       );
+
+      // Schedule next dynamic reminder based on this log time
+      final remindersEnabled =
+          await NotificationService.getMoodRemindersEnabled();
+      if (remindersEnabled) {
+        await NotificationService()
+            .scheduleNextReminderAfterLog(now, _moodInterval);
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -156,8 +240,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
             backgroundColor: Color(0xFFA8B475),
           ),
         );
-        
-        // Call the callback if provided
+
         if (widget.onMoodLogged != null) {
           widget.onMoodLogged!();
         }

@@ -19,7 +19,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
   final MoodService _moodService = MoodService();
   final AuthService _authService = AuthService();
   
-  int _mindscore = 60;
+  int? _mindscore;
   List<Mood> _moodHistory = [];
   bool _isLoading = true;
   
@@ -114,7 +114,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
       moods.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       setState(() {
-        _mindscore = mindscore;
+        _mindscore = mindscore; // null when no data logged yet
         _moodHistory = moods;
         _isLoading = false;
       });
@@ -185,7 +185,14 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final moodInfo = _getMoodInfo(_mindscore);
+    final bool hasData = _mindscore != null;
+    final moodInfo = hasData
+        ? _getMoodInfo(_mindscore!)
+        : <String, dynamic>{
+            'name': 'Belum Ada Data',
+            'color': const Color(0xFFA8B475),
+            'message': 'Kamu belum pernah log mood sebelumnya. Mulai catat mood-mu sekarang biar Mindscore kamu bisa terhitung!',
+          };
 
     return Scaffold(
       backgroundColor: moodInfo['color'] as Color,
@@ -391,7 +398,7 @@ class _MindscoreDetailScreenState extends State<MindscoreDetailScreen>
                                     child: Padding(
                                       padding: const EdgeInsets.all(16),
                                       child: Text(
-                                        '$_mindscore',
+                                        _mindscore != null ? '$_mindscore' : '--',
                                         style: GoogleFonts.urbanist(
                                           fontSize: 80,
                                           fontWeight: FontWeight.w700,

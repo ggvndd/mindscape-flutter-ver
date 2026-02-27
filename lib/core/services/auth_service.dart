@@ -221,4 +221,19 @@ class AuthService {
       'lastUpdatedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  /// Saves notification settings to Firestore for cross-device sync.
+  Future<void> saveNotificationSettings({
+    required String userId,
+    required int moodInterval,
+    required bool moodRemindersEnabled,
+    required bool rushHourNotifEnabled,
+  }) async {
+    await _firestore.collection('users').doc(userId).update({
+      'preferences.moodLogInterval': moodInterval,
+      'preferences.moodRemindersEnabled': moodRemindersEnabled,
+      'preferences.rushHourNotifEnabled': rushHourNotifEnabled,
+      'lastUpdatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

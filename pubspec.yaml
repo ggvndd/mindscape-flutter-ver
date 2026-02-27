@@ -60,6 +60,10 @@ dependencies:
   # Date & Time utilities
   intl: ^0.20.2
   
+  # Local Notifications
+  flutter_local_notifications: ^17.2.4
+  timezone: ^0.9.4
+
   # Icons
   cupertino_icons: ^1.0.8
 

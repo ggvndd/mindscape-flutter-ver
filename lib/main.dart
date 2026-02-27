@@ -11,6 +11,7 @@ import 'presentation/providers/chat_provider.dart';
 import 'presentation/providers/user_provider.dart';
 import 'presentation/providers/rush_hour_provider.dart';
 import 'data/services/local_storage_service.dart';
+import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +29,10 @@ void main() async {
   
   // Initialize context detector for adaptive behavior
   await ContextDetector.initialize();
-  
+
+  // Initialize local notifications
+  await NotificationService().initialize();
+
   runApp(const MindscapeApp());
 }
 

@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final ChatStorageService _chatStorage = ChatStorageService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
-  int _mindScore = 0;
+  int? _mindScore;
   Mood? _latestMood;
   List<Map<String, dynamic>> _weeklyMoodData = [];
   int _conversationCount = 0;
@@ -237,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '$_mindScore%',
+                                          _mindScore != null ? '$_mindScore%' : '--',
                                           style: GoogleFonts.urbanist(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -497,7 +497,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 120,
                     height: 120,
                     child: CircularProgressIndicator(
-                      value: _mindScore / 100,
+                      value: (_mindScore ?? 0) / 100,
                       strokeWidth: 12,
                       backgroundColor: Colors.white.withOpacity(0.3),
                       valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
@@ -507,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '$_mindScore',
+                        _mindScore != null ? '$_mindScore' : '--',
                         style: GoogleFonts.urbanist(
                           fontSize: 32,
                           fontWeight: FontWeight.w700,
@@ -515,7 +515,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Text(
-                        _getMoodLevel(_mindScore),
+                        _getMoodLevel(_mindScore ?? 0),
                         style: GoogleFonts.urbanist(
                           fontSize: 14,
                           color: Colors.white,

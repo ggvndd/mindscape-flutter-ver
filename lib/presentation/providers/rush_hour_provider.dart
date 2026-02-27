@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/notification_service.dart';
 
 /// Represents a single rush hour time period
 class RushHourPeriod {
@@ -92,6 +93,15 @@ class RushHourProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+
+    // Fire rush-hour notification if applicable
+    if (isRushHourActive) {
+      final rushNotifEnabled =
+          await NotificationService.getRushHourNotifEnabled();
+      if (rushNotifEnabled) {
+        await NotificationService().showRushHourNotification();
+      }
+    }
   }
 
   Future<void> saveRushHours(List<RushHourPeriod> periods) async {

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../domain/entities/mood.dart';
 import '../../widgets/mood_logging_dialog.dart';
 import 'mindscore_detail_screen.dart';
@@ -20,11 +21,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   final MoodService _moodService = MoodService();
   final AuthService _authService = AuthService();
   
-  int _mindScore = 60;
+  int? _mindScore;
   List<Map<String, dynamic>> _weeklyMoodData = [];
   List<Map<String, dynamic>> _monthlyMindscoreData = [];
   Map<String, Mood?> _dailyMoodData = {};
   bool _isLoading = true;
+  int _moodLogInterval = 3; // hours between mood log slots
   DateTime _currentWeekStart = DateTime.now();
   DateTime _selectedDate = DateTime.now();
   String _selectedInterval = 'Mingguan';
@@ -66,7 +68,10 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
 
       // Load mindscore
       final mindscore = await _moodService.calculateMindscore(user.uid);
-      
+
+      // Load mood log interval setting
+      final interval = await NotificationService.getSavedInterval();
+
       // Load weekly data
       final weeklyData = await _moodService.getWeeklyMoodData(
         userId: user.uid,
@@ -77,12 +82,14 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
       final dailyData = await _moodService.getDailyMoods(
         userId: user.uid,
         date: _selectedDate,
+        intervalHours: interval,
       );
 
       setState(() {
         _mindScore = mindscore;
         _weeklyMoodData = weeklyData;
         _dailyMoodData = dailyData;
+        _moodLogInterval = interval;
         _isLoading = false;
       });
     } catch (e) {
@@ -475,7 +482,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              '$_mindScore',
+              _mindScore != null ? '$_mindScore' : '--',
               style: GoogleFonts.urbanist(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -568,25 +575,29 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: _weeklyMoodData.map((data) {
                   final score = data['score'] as int;
-                  final height = (score / 100) * 160;
+                  final hasData = data['hasData'] as bool? ?? false;
+                  final barHeight = hasData ? (score / 100) * 160.0 : 8.0;
                   
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        '$score',
-                        style: GoogleFonts.urbanist(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3D2914),
-                        ),
-                      ),
+                      if (hasData)
+                        Text(
+                          '$score',
+                          style: GoogleFonts.urbanist(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF3D2914),
+                          ),
+                        )
+                      else
+                        const SizedBox(height: 15),
                       const SizedBox(height: 4),
                       Container(
                         width: 32,
-                        height: height,
+                        height: barHeight < 8 ? 8 : barHeight,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFA8B475),
+                          color: hasData ? const Color(0xFFA8B475) : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -806,13 +817,26 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Mood Tracker Harian',
-                style: GoogleFonts.urbanist(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF3D2914),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mood Tracker Harian',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF3D2914),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Setiap $_moodLogInterval jam',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 11,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
               ),
               Flexible(
                 child: GestureDetector(
@@ -864,11 +888,20 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               
               return Column(
                 children: [
-                  SvgPicture.asset(
-                    mood != null ? _getMoodIconPath(mood.mood) : 'assets/logos/moods/mood_fine.svg',
-                    width: 32,
-                    height: 32,
-                  ),
+                  mood != null
+                      ? SvgPicture.asset(
+                          _getMoodIconPath(mood.mood),
+                          width: 32,
+                          height: 32,
+                        )
+                      : Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey.shade200,
+                          ),
+                        ),
                   const SizedBox(height: 8),
                   Text(
                     time,

@@ -57,6 +57,7 @@ class MoodService {
   Future<Map<String, Mood?>> getDailyMoods({
     required String userId,
     required DateTime date,
+    int intervalHours = 3,
   }) async {
     try {
       // Get start and end of the day
@@ -69,30 +70,65 @@ class MoodService {
         endDate: endOfDay,
       );
 
-      // Create map with 3-hour intervals
+      // Anchor slots to the first log of the day (or 04:00 if no logs yet on
+      // a past date, or the current hour on today-with-no-logs).
+      final isToday = date.year == DateTime.now().year &&
+          date.month == DateTime.now().month &&
+          date.day == DateTime.now().day;
+
+      int anchorHour;
+      if (moods.isNotEmpty) {
+        // Use the earliest log's hour as anchor so slots line up with reality
+        final earliest = moods.reduce(
+            (a, b) => a.timestamp.isBefore(b.timestamp) ? a : b);
+        anchorHour = earliest.timestamp.hour;
+      } else if (isToday) {
+        // No logs yet today — show upcoming slots from current hour
+        anchorHour = DateTime.now().hour;
+      } else {
+        // Past date with no logs — fall back to 04:00
+        anchorHour = 4;
+      }
+
+      // Build the ordered slot list anchored at anchorHour, spanning the full day
+      final Set<int> slotHours = {};
+      // Walk forward from anchor
+      int h = anchorHour;
+      while (h <= 23) {
+        slotHours.add(h);
+        h += intervalHours;
+      }
+      // Walk backward from anchor
+      h = anchorHour - intervalHours;
+      while (h >= 0) {
+        slotHours.add(h);
+        h -= intervalHours;
+      }
+
+      final sortedHours = slotHours.toList()..sort();
       Map<String, Mood?> dailyMoods = {
-        '04:00': null,
-        '07:00': null,
-        '10:00': null,
-        '13:00': null,
-        '16:00': null,
-        '19:00': null,
-        '22:00': null,
+        for (final hour in sortedHours)
+          '${hour.toString().padLeft(2, '0')}:00': null,
       };
+
+      // Half-window for matching: moods within ±(interval/2) hours of a slot
+      final halfWindow = intervalHours / 2;
 
       // Find the closest mood for each time slot
       for (var timeSlot in dailyMoods.keys) {
         final hour = int.parse(timeSlot.split(':')[0]);
-        
-        // Find moods within 1.5 hours of this time slot
         final targetHour = hour;
+
         final closestMood = moods.where((mood) {
-          final moodHour = mood.timestamp.hour;
-          return (moodHour - targetHour).abs() <= 1.5;
+          final moodHour = mood.timestamp.hour +
+              mood.timestamp.minute / 60.0;
+          return (moodHour - targetHour).abs() <= halfWindow;
         }).fold<Mood?>(null, (closest, mood) {
           if (closest == null) return mood;
-          final closestDiff = (closest.timestamp.hour - targetHour).abs();
-          final currentDiff = (mood.timestamp.hour - targetHour).abs();
+          final closestDiff =
+              (closest.timestamp.hour - targetHour).abs().toDouble();
+          final currentDiff =
+              (mood.timestamp.hour - targetHour).abs().toDouble();
           return currentDiff < closestDiff ? mood : closest;
         });
 
@@ -125,8 +161,9 @@ class MoodService {
         );
 
         // Calculate average mood score for the day
-        int averageScore = 60; // Default to "fine"
-        if (dayMoods.isNotEmpty) {
+        final hasData = dayMoods.isNotEmpty;
+        int averageScore = 0;
+        if (hasData) {
           final totalScore = dayMoods.fold<int>(0, (sum, mood) => sum + mood.moodScore);
           averageScore = (totalScore / dayMoods.length).round();
         }
@@ -134,6 +171,7 @@ class MoodService {
         weeklyData.add({
           'day': _getDayName(currentDate.weekday),
           'score': averageScore,
+          'hasData': hasData,
           'date': currentDate,
         });
       }
@@ -145,7 +183,7 @@ class MoodService {
   }
 
   // Calculate overall mindscore (average of last 30 days)
-  Future<int> calculateMindscore(String userId) async {
+  Future<int?> calculateMindscore(String userId) async {
     try {
       final now = DateTime.now();
       final thirtyDaysAgo = now.subtract(const Duration(days: 30));
@@ -157,7 +195,7 @@ class MoodService {
       );
 
       if (moods.isEmpty) {
-        return 60; // Default mindscore
+        return null; // No data yet
       }
 
       final totalScore = moods.fold<int>(0, (sum, mood) => sum + mood.moodScore);
@@ -239,6 +277,25 @@ class MoodService {
     } catch (e) {
       throw Exception('Failed to get latest mood: $e');
     }
+  }
+
+  /// Returns the most recent mood logged within [now - intervalHours, now],
+  /// or null if no mood has been logged in that window.
+  Future<Mood?> getMoodInCurrentWindow(
+    String userId,
+    int intervalHours,
+  ) async {
+    final now = DateTime.now();
+    final windowStart = now.subtract(Duration(hours: intervalHours));
+    final moods = await getMoodsByDateRange(
+      userId: userId,
+      startDate: windowStart,
+      endDate: now,
+    );
+    if (moods.isEmpty) return null;
+    // Return the most recent one in this window
+    moods.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return moods.first;
   }
 
   // Helper method to get day name
