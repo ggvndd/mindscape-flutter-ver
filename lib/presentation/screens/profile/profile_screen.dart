@@ -170,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _buildMenuItem(
                               context,
                               icon: 'assets/logos/profile/Frame 118.svg',
-                              title: 'Notifikasi',
+                              title: 'Notifikasi dan Mood Logging',
                               onTap: () => Navigator.pushNamed(context, '/notification-settings'),
                             ),
                             _buildMenuItem(

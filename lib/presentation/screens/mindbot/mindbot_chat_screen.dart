@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/services/gemini_chat_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/chat_storage_service.dart';
+import '../../../core/services/mood_service.dart';
 
 /// Active chat screen with MindBot
 class MindbotChatScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
   final GeminiChatService _geminiService = GeminiChatService();
   final AuthService _authService = AuthService();
   final ChatStorageService _chatStorage = ChatStorageService();
+  final MoodService _moodService = MoodService();
   
   late ChatSession _chatSession;
   List<ChatMessage> _messages = [];
@@ -54,6 +56,27 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
         await _loadChatHistory(_currentChatId!);
       }
       _chatSession = _geminiService.startNewChat();
+    }
+    // Inject the user's recent mood history so Mindbot can give
+    // context-aware responses from the very first message.
+    await _injectMoodContext();
+  }
+
+  Future<void> _injectMoodContext() async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) return;
+      final now = DateTime.now();
+      final recentMoods = await _moodService.getMoodsByDateRange(
+        userId: user.uid,
+        startDate: now.subtract(const Duration(days: 7)),
+        endDate: now,
+      );
+      // Most-recent first so the context block reads naturally.
+      recentMoods.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      _geminiService.setMoodContext(recentMoods);
+    } catch (_) {
+      // Mood context is best-effort — never block the chat.
     }
   }
 

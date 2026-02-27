@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/services/mood_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/tot_measurement_service.dart';
 import 'package:intl/intl.dart';
 
 class MoodLoggingDialog extends StatefulWidget {
@@ -145,6 +146,12 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       _isLogging = true;
     });
 
+    // ── TOT: record elapsed ms and push to evaluation_logs the moment the
+    //        user taps Submit. Fire-and-forget – never awaited on the hot path.
+    TotMeasurementService.instance.submitAndLog(
+      _moods[_selectedIndex]['name'] as String,
+    );
+
     try {
       final user = _authService.currentUser;
       if (user == null) {
@@ -265,7 +272,17 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
     final currentMood = _moods[_selectedIndex];
     final Color backgroundColor = currentMood['color'];
     
-    return Scaffold(
+    return PopScope(
+      // canPop: true keeps default behaviour (back always works).
+      // onPopInvokedWithResult fires for EVERY pop — system back gesture,
+      // Android back button, and our own Navigator.pop calls.
+      // Because submitAndLog() already resets state, calling cancelTimer()
+      // after a successful submit is a harmless no-op.
+      canPop: true,
+      onPopInvokedWithResult: (bool didPop, _) {
+        if (didPop) TotMeasurementService.instance.cancelTimer();
+      },
+      child: Scaffold(
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
@@ -358,7 +375,11 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      // ── TOT: user explicitly cancelled – reset the timer ──
+                      TotMeasurementService.instance.cancelTimer();
+                      Navigator.pop(context);
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
@@ -566,6 +587,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       ),
         ],
       ),
+      ),  // end PopScope
     );
   }
 

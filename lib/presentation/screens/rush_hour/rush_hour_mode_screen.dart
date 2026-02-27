@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../widgets/mood_logging_dialog.dart';
 import '../mindbot/mindbot_screen.dart';
 import '../mood_tracker/mindscore_detail_screen.dart';
+import '../../../core/services/tot_measurement_service.dart';
 
 /// Full-screen Rush Hour Mode overlay with animated background circles
 /// and quick-access action buttons.
@@ -117,6 +118,8 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
   // ── Navigation helpers ────────────────────────────────────────────────────
 
   void _openMoodLogging() {
+    // ── TOT: start the stopwatch the instant the user taps the button ──
+    TotMeasurementService.instance.startTimer('rush_hour_ui');
     showMoodLoggingDialog(context, onMoodLogged: () {});
   }
 

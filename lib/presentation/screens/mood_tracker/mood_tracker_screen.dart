@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/tot_measurement_service.dart';
 import '../../../domain/entities/mood.dart';
 import '../../widgets/mood_logging_dialog.dart';
 import 'mindscore_detail_screen.dart';
@@ -108,6 +109,8 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 
   void _logMood() {
+    // ── TOT: start the stopwatch the instant the user taps the button ──
+    TotMeasurementService.instance.startTimer('standard_ui');
     showMoodLoggingDialog(
       context,
       onMoodLogged: () {
