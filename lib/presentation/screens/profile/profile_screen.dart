@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/data_export_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Profile screen showing user info and settings
@@ -16,6 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -197,12 +199,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              'Gavind @2026',
-                              style: GoogleFonts.urbanist(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF3D2914),
+                            // Hidden admin export trigger — long-press to export
+                            GestureDetector(
+                              onLongPress: () async {
+                                if (_isExporting) return;
+                                setState(() => _isExporting = true);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Fetching evaluation logs...'),
+                                    duration: Duration(seconds: 30),
+                                  ),
+                                );
+
+                                try {
+                                  final result =
+                                      await DataExportService.instance.exportToCsv();
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(result),
+                                        backgroundColor:
+                                            const Color(0xFFA8B475),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Export failed: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isExporting = false);
+                                  }
+                                }
+                              },
+                              child: Text(
+                                'Gavind @2026',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF3D2914),
+                                ),
                               ),
                             ),
                           ],

@@ -64,6 +64,11 @@ dependencies:
   flutter_local_notifications: ^17.2.4
   timezone: ^0.9.4
 
+  # Admin Export (researcher-only feature)
+  csv: ^6.0.0
+  path_provider: ^2.1.4
+  share_plus: ^10.0.3
+
   # Icons
   cupertino_icons: ^1.0.8
 
