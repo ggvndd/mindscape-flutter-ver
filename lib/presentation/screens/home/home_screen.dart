@@ -9,6 +9,8 @@ import '../../../core/services/chat_storage_service.dart';
 import '../../../domain/entities/mood.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../mindbot/mindbot_screen.dart';
+import '../mood_tracker/mood_tracker_screen.dart';
+import '../mood_tracker/mindscore_detail_screen.dart';
 import '../../providers/rush_hour_provider.dart';
 import '../rush_hour/rush_hour_mode_screen.dart';
 
@@ -450,7 +452,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMindscoreCard() {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/mood-tracker');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const MindscoreDetailScreen()),
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -568,7 +573,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/mood-tracker');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const MoodTrackerScreen()),
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(20),

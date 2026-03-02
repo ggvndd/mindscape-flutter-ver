@@ -106,6 +106,8 @@ class RushHourProvider extends ChangeNotifier {
 
   Future<void> saveRushHours(List<RushHourPeriod> periods) async {
     _rushHourPeriods = List.from(periods);
+    // Reset so the popup can fire again if we're in a rush hour window
+    _popupShownForSession = false;
     notifyListeners();
 
     try {

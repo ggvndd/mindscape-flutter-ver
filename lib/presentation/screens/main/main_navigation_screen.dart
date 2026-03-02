@@ -32,6 +32,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _initRushHour();
+    // Also listen for future rush-hour saves during the session
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<RushHourProvider>(context, listen: false)
+          .addListener(_onRushHourChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    Provider.of<RushHourProvider>(context, listen: false)
+        .removeListener(_onRushHourChanged);
+    super.dispose();
+  }
+
+  void _onRushHourChanged() {
+    final provider = Provider.of<RushHourProvider>(context, listen: false);
+    if (mounted && provider.shouldShowPopup) {
+      provider.markPopupShown();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showRushHourPopup();
+      });
+    }
   }
 
   Future<void> _initRushHour() async {

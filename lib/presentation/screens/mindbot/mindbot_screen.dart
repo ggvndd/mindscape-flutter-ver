@@ -68,7 +68,13 @@ class _MindbotScreenState extends State<MindbotScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F3F0),
       body: SafeArea(
-        child: Column(
+        left: false,
+        right: false,
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
           children: [
             // Header
             Padding(
@@ -214,6 +220,8 @@ class _MindbotScreenState extends State<MindbotScreen> {
           ],
         ),
       ),
+    ),
+  ),
     );
   }
 

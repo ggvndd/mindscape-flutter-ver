@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/services/auth_service.dart';
+import '../../providers/rush_hour_provider.dart';
 
 /// Rush Hour settings screen for managing rush hour time periods
 class RushHourSettingsScreen extends StatefulWidget {
@@ -118,20 +120,12 @@ class _RushHourSettingsScreenState extends State<RushHourSettingsScreen> {
   Future<void> _saveSettings() async {
     setState(() => _isLoading = true);
     try {
-      await _authService.saveRushHours(
-        _rushHourPeriods
-            .map((p) => {
-                  'start': {
-                    'hour': p.startTime.hour,
-                    'minute': p.startTime.minute
-                  },
-                  'end': {
-                    'hour': p.endTime.hour,
-                    'minute': p.endTime.minute
-                  },
-                })
-            .toList(),
-      );
+      // Save via the provider so it resets _popupShownForSession
+      // and triggers the popup check in MainNavigationScreen
+      if (mounted) {
+        await Provider.of<RushHourProvider>(context, listen: false)
+            .saveRushHours(_rushHourPeriods);
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -456,14 +450,4 @@ class _RushHourSettingsScreenState extends State<RushHourSettingsScreen> {
       ),
     );
   }
-}
-
-class RushHourPeriod {
-  TimeOfDay startTime;
-  TimeOfDay endTime;
-
-  RushHourPeriod({
-    required this.startTime,
-    required this.endTime,
-  });
 }
