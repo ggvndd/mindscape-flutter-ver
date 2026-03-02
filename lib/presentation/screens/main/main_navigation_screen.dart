@@ -31,11 +31,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    _initRushHour();
-    // Also listen for future rush-hour saves during the session
+    // Defer until first frame so notifyListeners() inside loadRushHours()
+    // doesn't fire while the widget tree is still being built.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<RushHourProvider>(context, listen: false)
           .addListener(_onRushHourChanged);
+      _initRushHour();
     });
   }
 

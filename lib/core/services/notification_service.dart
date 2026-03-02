@@ -46,6 +46,10 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      // Show notifications as banners even when the app is in the foreground
+      defaultPresentAlert: true,
+      defaultPresentBadge: true,
+      defaultPresentSound: true,
     );
     const initSettings =
         InitializationSettings(android: androidSettings, iOS: iosSettings);
@@ -244,6 +248,28 @@ class NotificationService {
 
   Future<void> cancelRushHourNotification() async {
     await _plugin.cancel(_rushHourNotifId);
+  }
+
+  /// Fires an immediate mood notification — for use in the test button only.
+  Future<void> showImmediateMoodNotification() async {
+    await _plugin.show(
+      _nextAfterLogId,
+      '⏰ Waktunya Log Mood!',
+      'Gimana perasaan kamu sekarang? Catat di MindScape.',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _moodChannelId,
+          'Pengingat Mood',
+          channelDescription: 'Pengingat harian untuk mencatat mood kamu',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentSound: true,
+        ),
+      ),
+    );
   }
 
   // ──────────────────────────────────────────────────────────────────────────

@@ -255,17 +255,13 @@ class _NotificationSettingsScreenState
                                 child: OutlinedButton.icon(
                                   onPressed: () async {
                                     await _notifService.requestPermissions();
-                                    await NotificationService()
-                                        .scheduleNextReminderAfterLog(
-                                      DateTime.now()
-                                          .add(const Duration(seconds: 5)),
-                                      1, // fires in 5 s for testing
-                                    );
+                                    await _notifService
+                                        .showImmediateMoodNotification();
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
                                         content: Text(
-                                          'Notifikasi mood dikirim dalam ~5 detik',
+                                          'Notifikasi mood dikirim!',
                                           style: GoogleFonts.urbanist(),
                                         ),
                                         backgroundColor:

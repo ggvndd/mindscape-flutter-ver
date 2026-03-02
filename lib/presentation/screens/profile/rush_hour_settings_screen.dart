@@ -29,6 +29,7 @@ class _RushHourSettingsScreenState extends State<RushHourSettingsScreen> {
       final userData = await _authService.getUserData();
       final rushHourData = userData?['preferences']?['rushHours'];
       
+      if (!mounted) return;
       setState(() {
         if (rushHourData != null && rushHourData is List) {
           _rushHourPeriods = rushHourData.map((period) {
@@ -63,6 +64,7 @@ class _RushHourSettingsScreenState extends State<RushHourSettingsScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });

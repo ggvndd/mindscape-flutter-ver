@@ -55,7 +55,8 @@ class RushHourProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Returns true if the current clock time falls within any configured rush hour
+  /// Returns true if the current clock time falls within any configured rush hour.
+  /// Handles overnight periods (e.g. 22:00–01:00) correctly.
   bool get isRushHourActive {
     if (_debugForceActive) return true;
     final now = TimeOfDay.now();
@@ -64,8 +65,17 @@ class RushHourProvider extends ChangeNotifier {
       final startMinutes =
           period.startTime.hour * 60 + period.startTime.minute;
       final endMinutes = period.endTime.hour * 60 + period.endTime.minute;
-      if (nowMinutes >= startMinutes && nowMinutes < endMinutes) {
-        return true;
+
+      if (startMinutes <= endMinutes) {
+        // Same-day period e.g. 09:00–17:00
+        if (nowMinutes >= startMinutes && nowMinutes < endMinutes) {
+          return true;
+        }
+      } else {
+        // Overnight period e.g. 22:00–01:00 (crosses midnight)
+        if (nowMinutes >= startMinutes || nowMinutes < endMinutes) {
+          return true;
+        }
       }
     }
     return false;
