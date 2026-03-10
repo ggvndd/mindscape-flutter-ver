@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/mood_service.dart';
 
 /// Sign up screen with form validation and error states
 class SignUpScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
+  String _loadingLabel = 'Memuat...';
   
   // Validation states
   String? _nameError;
@@ -192,17 +194,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
-      // Use Firebase to create account
+      // 1. Create Firebase Auth account
       final authService = AuthService();
-      await authService.signUp(
+      final credential = await authService.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         displayName: _nameController.text.trim(),
       );
-      
-      // Navigate to rush hour screen on success
+
+      final uid = credential?.user?.uid;
+      if (uid == null) throw Exception('Gagal mendapatkan user ID.');
+
+      // 2. Seed 7 days of dummy mood data so the dashboard isn't empty
+      if (mounted) setState(() => _loadingLabel = 'Menyiapkan dashboard kamu...');
+      await MoodService().seedInitialDummyData(uid);
+
+      // 3. Navigate only after the batch has committed
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/rush-hour');
       }
@@ -696,13 +705,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         elevation: 0,
                       ),
                       child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _loadingLabel,
+                                  style: GoogleFonts.urbanist(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,

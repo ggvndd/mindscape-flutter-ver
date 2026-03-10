@@ -113,6 +113,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     TotMeasurementService.instance.startTimer('standard_ui');
     showMoodLoggingDialog(
       context,
+      uiCondition: 'standard_ui',
       onMoodLogged: () {
         _loadData(); // Refresh data after logging
       },

@@ -120,7 +120,7 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
   void _openMoodLogging() {
     // ── TOT: start the stopwatch the instant the user taps the button ──
     TotMeasurementService.instance.startTimer('rush_hour_ui');
-    showMoodLoggingDialog(context, onMoodLogged: () {});
+    showMoodLoggingDialog(context, uiCondition: 'rush_hour_ui', onMoodLogged: () {});
   }
 
   void _openMindscore() {

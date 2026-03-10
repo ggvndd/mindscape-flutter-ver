@@ -53,10 +53,10 @@ service cloud.firestore {
 
     // Evaluation logs — TOT measurement (researcher data collection)
     // Any authenticated user can create their own entry.
-    // Only the owning user can read their own entry (researcher exports via Admin SDK / console).
+    // Any authenticated user can read all entries (needed for researcher CSV export).
     match /evaluation_logs/{logId} {
       allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
-      allow read:   if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow read:   if isAuthenticated();
     }
   }
 }

@@ -5,14 +5,17 @@ import '../../core/services/mood_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/services/tot_measurement_service.dart';
+import '../../core/services/gemma_mood_response_service.dart';
 import 'package:intl/intl.dart';
 
 class MoodLoggingDialog extends StatefulWidget {
   final Function? onMoodLogged;
+  final String uiCondition;
 
   const MoodLoggingDialog({
     Key? key,
     this.onMoodLogged,
+    this.uiCondition = 'standard_ui',
   }) : super(key: key);
 
   @override
@@ -27,6 +30,8 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   
   int _selectedIndex = 2; // Default to "Just Okay" (middle)
   bool _isLogging = false;
+  bool _isLoadingResponse = false;
+  String? _aiResponse;
   int _moodInterval = 3; // loaded from prefs
   
   late AnimationController _circle1Controller;
@@ -240,16 +245,22 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       }
 
       if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mood berhasil dicatat!'),
-            backgroundColor: Color(0xFFA8B475),
-          ),
+        // ── Fetch MindBot response before closing the screen ─────────────
+        setState(() => _isLoadingResponse = true);
+        final aiReply = await GemmaMoodResponseService.instance.getGemmaResponse(
+          userId: user.uid,
+          currentMood: _moods[_selectedIndex]['name'] as String,
+          currentNote: _noteController.text.trim().isEmpty
+              ? null
+              : _noteController.text.trim(),
+          uiCondition: widget.uiCondition,
         );
-
-        if (widget.onMoodLogged != null) {
-          widget.onMoodLogged!();
+        if (mounted) {
+          setState(() {
+            _aiResponse = aiReply;
+            _isLoadingResponse = false;
+            _isLogging = false;
+          });
         }
       }
     } catch (e) {
@@ -369,7 +380,9 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
           SafeArea(
         child: Column(
           children: [
-            // Top bar with back button
+            if (_aiResponse != null || _isLoadingResponse)
+              ..._buildResponseChildren()
+            else ...[
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Row(
@@ -582,6 +595,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                 ),
               ),
             ),
+            ], // close else
           ],
         ),
       ),
@@ -589,6 +603,122 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       ),
       ),  // end PopScope
     );
+  }
+
+  List<Widget> _buildResponseChildren() {
+    final Color bgColor = (_moods[_selectedIndex]['color'] as Color);
+    return [
+      // MindBot header
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.25),
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SvgPicture.asset(
+                  'assets/logos/chatbot/Vector-1.svg',
+                  colorFilter: const ColorFilter.mode(
+                      Colors.white, BlendMode.srcIn),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'MindBot',
+              style: GoogleFonts.urbanist(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+      // Response card
+      Expanded(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: _isLoadingResponse
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 48),
+                    child: CircularProgressIndicator(
+                      color: Colors.white54,
+                      strokeWidth: 2.5,
+                    ),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    _aiResponse ?? '',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 15,
+                      color: const Color(0xFF3D2914),
+                      height: 1.65,
+                    ),
+                  ),
+                ),
+        ),
+      ),
+      // Selesai button
+      Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: _isLoadingResponse
+                ? null
+                : () {
+                    if (widget.onMoodLogged != null) widget.onMoodLogged!();
+                    Navigator.pop(context);
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              disabledBackgroundColor: Colors.white38,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              elevation: 0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Selesai',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: bgColor,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.check_circle_outline, color: bgColor, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 
   Widget _buildMoodSlider() {
@@ -769,12 +899,19 @@ class CurvedLinePainter extends CustomPainter {
 }
 
 // Helper function to show the fullscreen mood dialog
-void showMoodLoggingDialog(BuildContext context, {Function? onMoodLogged}) {
+void showMoodLoggingDialog(
+  BuildContext context, {
+  String uiCondition = 'standard_ui',
+  Function? onMoodLogged,
+}) {
   Navigator.push(
     context,
     MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) => MoodLoggingDialog(onMoodLogged: onMoodLogged),
+      builder: (context) => MoodLoggingDialog(
+        uiCondition: uiCondition,
+        onMoodLogged: onMoodLogged,
+      ),
     ),
   );
 }

@@ -334,6 +334,88 @@ class MoodService {
     }
   }
 
+  // ── Onboarding seed ──────────────────────────────────────────────────────
+
+  /// Writes 7 days of realistic dummy mood logs for a brand-new user.
+  /// Uses a [WriteBatch] so all documents land atomically in one round-trip.
+  Future<void> seedInitialDummyData(String uid) async {
+    final now = DateTime.now();
+    final WriteBatch batch = _firestore.batch();
+
+    // One entry per day for the past 7 days, spread across realistic hours.
+    // The pattern shows a believable week: tired early-week, recovering late-week.
+    final List<Map<String, dynamic>> seeds = [
+      {
+        'mood': 'sad',
+        'note': 'Kerjaan numpuk banget minggu ini',
+        'daysAgo': 6,
+        'hour': 21,
+      },
+      {
+        'mood': 'justokay',
+        'note': null,
+        'daysAgo': 5,
+        'hour': 13,
+      },
+      {
+        'mood': 'gloomy',
+        'note': 'Deadline side gig mepet, capek banget',
+        'daysAgo': 4,
+        'hour': 22,
+      },
+      {
+        'mood': 'justokay',
+        'note': 'Lumayan bisa istirahat siang',
+        'daysAgo': 3,
+        'hour': 14,
+      },
+      {
+        'mood': 'fine',
+        'note': null,
+        'daysAgo': 2,
+        'hour': 19,
+      },
+      {
+        'mood': 'fine',
+        'note': 'Weekend, bisa napas dikit',
+        'daysAgo': 1,
+        'hour': 11,
+      },
+      {
+        'mood': 'happy',
+        'note': 'Semangat mulai minggu baru!',
+        'daysAgo': 0,
+        'hour': 9,
+      },
+    ];
+
+    for (final seed in seeds) {
+      final timestamp = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        seed['hour'] as int,
+      ).subtract(Duration(days: seed['daysAgo'] as int));
+
+      final moodName = seed['mood'] as String;
+      final docRef = _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('moods')
+          .doc(); // auto-ID
+
+      batch.set(docRef, {
+        'userId': uid,
+        'mood': moodName,
+        'moodScore': Mood.getMoodScore(moodName),
+        'timestamp': Timestamp.fromDate(timestamp),
+        'note': seed['note'],
+      });
+    }
+
+    await batch.commit();
+  }
+
   // Update a mood
   Future<void> updateMood({
     required String userId,
