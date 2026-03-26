@@ -484,7 +484,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                         ),
                         padding: const EdgeInsets.all(20),
                         child: SvgPicture.asset(
-                          'assets/logos/moods/mood_${currentMood[\"name\"]}.svg',
+                          'assets/logos/moods/mood_${currentMood['name']}.svg',
                           width: 100,
                           height: 100,
                           colorFilter: ColorFilter.mode(
