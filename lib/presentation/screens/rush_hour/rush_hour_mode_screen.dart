@@ -260,9 +260,28 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
                   const SizedBox(height: 40),
 
                   // ── Action buttons ──────────────────────────────────────
-                  _actionButton(
-                    label: 'Logging Mood',
-                    onTap: _openMoodLogging,
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _openMoodLogging,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF7A9B58),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Logging Mood',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF7A9B58),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   _actionButton(

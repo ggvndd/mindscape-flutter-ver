@@ -774,12 +774,44 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
         
         return Column(
           children: [
+            // Interactive hint
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.touch_app_rounded,
+                    color: Colors.white.withOpacity(0.7),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Geser atau tekan titik untuk memilih',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
             // Curved line with dots
             SizedBox(
               height: 80,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
+              child: GestureDetector(
+                onHorizontalDragUpdate: (details) {
+                  final dx = details.localPosition.dx;
+                  final newIndex =
+                      (dx / (totalWidth / (dotCount - 1))).round().clamp(0, dotCount - 1);
+                  if (newIndex != _selectedIndex) {
+                    setState(() => _selectedIndex = newIndex);
+                  }
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
                   // Custom painted curved line
                   Positioned.fill(
                     child: CustomPaint(
@@ -835,6 +867,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                   }),
                 ],
               ),
+            ),
             ),
             
             const SizedBox(height: 8),
