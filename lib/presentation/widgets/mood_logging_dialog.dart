@@ -70,7 +70,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       'name': 'fine',
       'display': 'Senang',
       'label': 'Aku Lagi Senang',
-      'color': Color(0xFF8B7355),
+      'color': Color(0xFFE89B7D),  // Warm coral
     },
     {
       'name': 'happy',
@@ -479,7 +479,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: backgroundColor.withOpacity(0.25),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(70),
                         ),
                         padding: const EdgeInsets.all(20),
@@ -487,10 +487,6 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                           'assets/logos/moods/mood_${currentMood['name']}.svg',
                           width: 100,
                           height: 100,
-                          colorFilter: ColorFilter.mode(
-                            backgroundColor,
-                            BlendMode.srcIn,
-                          ),
                         ),
                       ),
                       
@@ -692,9 +688,10 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       ),
       // Response card
       Expanded(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: _isLoadingResponse
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: _isLoadingResponse
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.only(top: 48),
@@ -728,6 +725,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                 ),
         ),
       ),
+          ),
       // Selesai button
       Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
