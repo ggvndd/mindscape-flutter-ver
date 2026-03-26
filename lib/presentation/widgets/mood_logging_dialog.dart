@@ -52,7 +52,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
       'name': 'gloomy',
       'display': 'Depresi',
       'label': 'Aku Lagi Depresi',
-      'color': Color(0xFF5B3A8E),
+      'color': Color(0xFF5B9FD4),  // Light blue
     },
     {
       'name': 'sad',
@@ -479,14 +479,18 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: backgroundColor.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(70),
                         ),
                         padding: const EdgeInsets.all(20),
                         child: SvgPicture.asset(
-                          'assets/logos/moods/mood_${currentMood['name']}.svg',
+                          'assets/logos/moods/mood_${currentMood[\"name\"]}.svg',
                           width: 100,
                           height: 100,
+                          colorFilter: ColorFilter.mode(
+                            backgroundColor,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                       
