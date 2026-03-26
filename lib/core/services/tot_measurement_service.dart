@@ -57,6 +57,14 @@ class TotMeasurementService {
     _uiCondition = null;
   }
 
+  /// Returns current elapsed milliseconds for the active timer.
+  ///
+  /// Useful for temporary debug UI; returns `null` when no timer is active.
+  int? getCurrentElapsedMs() {
+    if (_startTime == null) return null;
+    return DateTime.now().difference(_startTime!).inMilliseconds;
+  }
+
   /// Calculates the elapsed milliseconds, builds the evaluation payload,
   /// persists it to Firestore, and resets the timer state.
   ///

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +25,8 @@ class MoodLoggingDialog extends StatefulWidget {
 
 class _MoodLoggingDialogState extends State<MoodLoggingDialog>
     with TickerProviderStateMixin {
+  static const bool _showTotDebugBadge = true;
+
   final MoodService _moodService = MoodService();
   final AuthService _authService = AuthService();
   final TextEditingController _noteController = TextEditingController();
@@ -33,6 +36,8 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   bool _isLoadingResponse = false;
   String? _aiResponse;
   int _moodInterval = 3; // loaded from prefs
+  int _elapsedTotMs = 0;
+  Timer? _totTicker;
   
   late AnimationController _circle1Controller;
   late AnimationController _circle2Controller;
@@ -86,6 +91,24 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
     super.initState();
     _initializeAnimations();
     _loadInterval();
+    _startTotDebugTicker();
+  }
+
+  void _startTotDebugTicker() {
+    if (!_showTotDebugBadge) return;
+
+    _totTicker = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (!mounted) return;
+      final elapsed = TotMeasurementService.instance.getCurrentElapsedMs() ?? 0;
+      if (elapsed != _elapsedTotMs) {
+        setState(() => _elapsedTotMs = elapsed);
+      }
+    });
+  }
+
+  String _formatTotMs(int ms) {
+    final seconds = ms / 1000;
+    return '${seconds.toStringAsFixed(1)}s';
   }
 
   Future<void> _loadInterval() async {
@@ -139,6 +162,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   
   @override
   void dispose() {
+    _totTicker?.cancel();
     _noteController.dispose();
     _circle1Controller.dispose();
     _circle2Controller.dispose();
@@ -599,6 +623,27 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
           ],
         ),
       ),
+          if (_showTotDebugBadge)
+            Positioned(
+              top: 54,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white.withOpacity(0.35)),
+                ),
+                child: Text(
+                  'TOT ${_formatTotMs(_elapsedTotMs)}',
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       ),  // end PopScope

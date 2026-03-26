@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../app/router/app_router.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
@@ -291,7 +292,13 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             children: [
               // Back button
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRouter.mainNavigationRoute,
+                    (route) => false,
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
