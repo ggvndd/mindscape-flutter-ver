@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/data_export_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../providers/adaptive_provider.dart';
 
 /// Profile screen showing user info and settings
 class ProfileScreen extends StatefulWidget {
@@ -43,12 +44,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = _authService.currentUser;
     final displayName = user?.displayName ?? _userData?['displayName'] ?? 'Username';
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Container(
-              color: const Color(0xFFF5F3F0),
+              color: theme.colorScheme.surface,
               child: Column(
                 children: [
                   // Profile Header with brown background
@@ -60,9 +64,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       right: 24,
                       bottom: 40,
                     ),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF3D2914),
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? theme.colorScheme.primaryContainer
+                          : const Color(0xFF3D2914),
+                      borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(24),
                         bottomRight: Radius.circular(24),
                       ),
@@ -75,7 +81,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: GoogleFonts.urbanist(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: isDark
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : Colors.white,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -84,13 +92,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                              color: isDark
+                                  ? theme.colorScheme.surfaceContainerHighest
+                                  : Colors.grey[300],
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.person,
                               size: 40,
-                              color: Colors.grey[600],
+                              color: isDark
+                                  ? theme.colorScheme.onSurface
+                                  : Colors.grey[600],
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -100,7 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: GoogleFonts.urbanist(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: isDark
+                                  ? theme.colorScheme.onPrimaryContainer
+                                  : Colors.white,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -112,8 +126,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'assets/logos/chatbot/Vector-1.svg',
                                 width: 20,
                                 height: 20,
-                                colorFilter: const ColorFilter.mode(
-                                  Color(0xFFA8B475),
+                                colorFilter: ColorFilter.mode(
+                                  isDark
+                                      ? theme.colorScheme.primary
+                                      : const Color(0xFFA8B475),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -123,7 +139,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: GoogleFonts.urbanist(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: isDark
+                                      ? theme.colorScheme.onPrimaryContainer
+                                      : Colors.white,
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -131,8 +149,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'assets/logos/profile/Frame 117.svg',
                                 width: 20,
                                 height: 20,
-                                colorFilter: const ColorFilter.mode(
-                                  Color(0xFFA8B475),
+                                colorFilter: ColorFilter.mode(
+                                  isDark
+                                      ? theme.colorScheme.primary
+                                      : const Color(0xFFA8B475),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -142,7 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: GoogleFonts.urbanist(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: isDark
+                                      ? theme.colorScheme.onPrimaryContainer
+                                      : Colors.white,
                                 ),
                               ),
                             ],
@@ -181,7 +203,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               title: 'Keamanan',
                               onTap: () => Navigator.pushNamed(context, '/security-settings'),
                             ),
-                            
+                            _buildDarkModeToggle(context),
+
                             // Logout button
                             _buildLogoutButton(context),
 
@@ -194,7 +217,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: GoogleFonts.urbanist(
                                 fontSize: 12,
                                 fontStyle: FontStyle.italic,
-                                color: Colors.grey[600],
+                                color: isDark
+                                    ? theme.colorScheme.onSurface.withOpacity(0.6)
+                                    : Colors.grey[600],
                                 height: 1.5,
                               ),
                             ),
@@ -248,7 +273,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 style: GoogleFonts.urbanist(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF3D2914),
+                                  color: isDark
+                                      ? theme.colorScheme.onSurface
+                                      : const Color(0xFF3D2914),
                                 ),
                               ),
                             ),
@@ -268,6 +295,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String title,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -276,11 +306,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark
+                ? theme.colorScheme.surfaceContainerHighest
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -292,8 +324,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon,
                 width: 24,
                 height: 24,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF3D2914),
+                colorFilter: ColorFilter.mode(
+                  isDark
+                      ? theme.colorScheme.onSurface
+                      : const Color(0xFF3D2914),
                   BlendMode.srcIn,
                 ),
               ),
@@ -304,18 +338,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.urbanist(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF3D2914),
+                    color: isDark
+                        ? theme.colorScheme.onSurface
+                        : const Color(0xFF3D2914),
                   ),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right,
-                color: Color(0xFF3D2914),
+                color: isDark
+                    ? theme.colorScheme.onSurface
+                    : const Color(0xFF3D2914),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDarkModeToggle(BuildContext context) {
+    final theme = Theme.of(context);
+    final isThemeDark = theme.brightness == Brightness.dark;
+
+    return Consumer<AdaptiveProvider>(
+      builder: (context, adaptiveProvider, child) {
+        final isDarkMode = adaptiveProvider.isDarkMode;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isThemeDark
+                  ? theme.colorScheme.surfaceContainerHighest
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isThemeDark ? 0.2 : 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                  size: 24,
+                  color: isThemeDark
+                      ? theme.colorScheme.onSurface
+                      : const Color(0xFF3D2914),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Mode Gelap',
+                    style: GoogleFonts.urbanist(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isThemeDark
+                          ? theme.colorScheme.onSurface
+                          : const Color(0xFF3D2914),
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: isDarkMode,
+                  onChanged: (_) => adaptiveProvider.toggleDarkMode(),
+                  activeTrackColor: const Color(0xFFA8B475),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

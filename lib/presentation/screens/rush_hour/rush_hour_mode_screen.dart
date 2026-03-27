@@ -4,6 +4,7 @@ import '../../widgets/mood_logging_dialog.dart';
 import '../mindbot/mindbot_screen.dart';
 import '../mood_tracker/mindscore_detail_screen.dart';
 import '../../../core/services/tot_measurement_service.dart';
+import '../../../core/constants/app_colors.dart';
 
 /// Full-screen Rush Hour Mode overlay with animated background circles
 /// and quick-access action buttons.
@@ -146,7 +147,7 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    const bgColor = Color(0xFF7A9B58);
+    const bgColor = AppColors.primary;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -266,7 +267,7 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
                       onPressed: _openMoodLogging,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF7A9B58),
+                        foregroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),
@@ -278,7 +279,7 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
                         style: GoogleFonts.urbanist(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF7A9B58),
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -359,21 +360,23 @@ class _RushHourModeScreenState extends State<RushHourModeScreen>
   Widget _actionButton({required String label, required VoidCallback onTap}) {
     return SizedBox(
       width: double.infinity,
-      child: OutlinedButton(
+      child: ElevatedButton(
         onPressed: onTap,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: Colors.white, width: 1.5),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(40),
           ),
+          elevation: 0,
         ),
         child: Text(
           label,
           style: GoogleFonts.urbanist(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primary,
           ),
         ),
       ),

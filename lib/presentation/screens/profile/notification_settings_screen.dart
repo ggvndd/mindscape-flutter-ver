@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/constants/app_colors.dart';
 
 /// Notification settings screen — mood log interval + notification toggles
 class NotificationSettingsScreen extends StatefulWidget {
@@ -301,16 +302,15 @@ class _NotificationSettingsScreenState
                                           'Notifikasi Rush Hour dikirim!',
                                           style: GoogleFonts.urbanist(),
                                         ),
-                                        backgroundColor:
-                                            const Color(0xFF7A9B58),
+                                        backgroundColor: AppColors.primary,
                                         behavior: SnackBarBehavior.floating,
                                       ));
                                     }
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: const Color(0xFF7A9B58),
+                                    foregroundColor: AppColors.primary,
                                     side: const BorderSide(
-                                        color: Color(0xFF7A9B58), width: 1.5),
+                                        color: AppColors.primary, width: 1.5),
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 12),
                                     shape: RoundedRectangleBorder(

@@ -8,6 +8,7 @@ import '../mood_tracker/mood_tracker_screen.dart';
 import '../rush_hour/rush_hour_mode_screen.dart';
 import '../../providers/rush_hour_provider.dart';
 import '../../widgets/navigation/bottom_nav_bar.dart';
+import '../../../core/constants/app_colors.dart';
 
 /// Main navigation screen with bottom navigation bar
 class MainNavigationScreen extends StatefulWidget {
@@ -89,12 +90,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7A9B58).withOpacity(0.15),
+                  color: AppColors.primary.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.directions_run_rounded,
-                  color: Color(0xFF7A9B58),
+                  color: AppColors.primary,
                   size: 32,
                 ),
               ),
@@ -104,7 +105,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 style: GoogleFonts.urbanist(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF7A9B58),
+                  color: AppColors.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -146,7 +147,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7A9B58),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
