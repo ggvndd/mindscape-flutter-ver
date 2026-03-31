@@ -3,6 +3,12 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // Force Java 17 for all subprojects
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
+    }
 }
 
 val newBuildDir: Directory =
