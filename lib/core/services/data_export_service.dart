@@ -5,7 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Researcher-only service: fetches all evaluation_logs from Firestore,
-/// converts them to a CSV file and triggers the native share sheet.
+/// converts them to a CSV file, then either saves to Downloads (macOS)
+/// or triggers the native share sheet (mobile).
 ///
 /// Triggered by a hidden long-press gesture in the Profile screen —
 /// never visible or accessible to regular users.
@@ -17,8 +18,12 @@ class DataExportService {
 
   // ── Public API ────────────────────────────────────────────────────────────
 
-  /// Fetches every document in `evaluation_logs`, writes a CSV to the
-  /// temporary directory, and opens the native share sheet.
+  /// Fetches every document in `evaluation_logs` and writes them to a CSV.
+  ///
+  /// On macOS, the file is saved directly to Downloads so researchers can
+  /// access it immediately from Finder.
+  /// On other platforms, the file is saved in app documents and opened through
+  /// the native share sheet.
   ///
   /// Returns a human-readable status string (used for SnackBar feedback).
   Future<String> exportToCsv() async {
@@ -61,22 +66,45 @@ class DataExportService {
     // ── 3. Convert to CSV string ───────────────────────────────────────────
     final String csvContent = const ListToCsvConverter().convert(rows);
 
-    // ── 4. Write to a temp file ────────────────────────────────────────────
-    final Directory dir = await getApplicationDocumentsDirectory();
-    final String filePath = '${dir.path}/tot_results.csv';
+    // ── 4. Write CSV file ──────────────────────────────────────────────────
+    final Directory dir = await _resolveExportDirectory();
+    final String fileName = _buildFileName();
+    final String filePath = '${dir.path}/$fileName';
     final File file = File(filePath);
     await file.writeAsString(csvContent);
 
-    // ── 5. Share via native sheet ──────────────────────────────────────────
+    // ── 5. macOS: return saved path, others: open share sheet ─────────────
+    if (Platform.isMacOS) {
+      return 'Exported ${snapshot.docs.length} rows to $filePath';
+    }
+
     await Share.shareXFiles(
       [XFile(filePath, mimeType: 'text/csv')],
-      subject: 'Mindscape – TOT Evaluation Logs (${snapshot.docs.length} rows)',
+      subject: 'Mindscape - TOT Evaluation Logs (${snapshot.docs.length} rows)',
     );
 
     return 'Exported ${snapshot.docs.length} rows successfully.';
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  Future<Directory> _resolveExportDirectory() async {
+    if (Platform.isMacOS) {
+      final Directory? downloadsDirectory = await getDownloadsDirectory();
+      if (downloadsDirectory != null) {
+        return downloadsDirectory;
+      }
+    }
+
+    return getApplicationDocumentsDirectory();
+  }
+
+  String _buildFileName() {
+    final DateTime now = DateTime.now();
+    final String suffix =
+        '${now.year}${_pad(now.month)}${_pad(now.day)}_${_pad(now.hour)}${_pad(now.minute)}${_pad(now.second)}';
+    return 'tot_results_$suffix.csv';
+  }
 
   String _pad(int n) => n.toString().padLeft(2, '0');
 }

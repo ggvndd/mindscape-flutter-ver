@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/app_lock_service.dart';
+import '../../../core/services/auth_service.dart';
 
 /// Screen for verifying PIN when app is opened
 class AppLockVerifyScreen extends StatefulWidget {
@@ -234,6 +235,26 @@ class _AppLockVerifyScreenState extends State<AppLockVerifyScreen> {
                               'Kembali',
                               style: GoogleFonts.urbanist(
                                 color: Colors.grey[600],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              await AuthService().signOut();
+                              if (mounted) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/sign_in',
+                                  (route) => false,
+                                );
+                              }
+                            },
+                            child: Text(
+                              'Logout',
+                              style: GoogleFonts.urbanist(
+                                color: const Color(0xFFA8B475),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
