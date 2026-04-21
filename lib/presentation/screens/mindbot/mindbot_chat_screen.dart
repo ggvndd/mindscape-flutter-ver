@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/gemini_chat_service.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/chat_storage_service.dart';
@@ -45,7 +46,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     _loadUsername();
   }
 
-  void _initializeChat() async {
+  Future<void> _initializeChat() async {
     if (widget.isNewChat) {
       _chatSession = _geminiService.startNewChat();
       _currentChatId = null; // Will be created on first message
@@ -54,6 +55,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
       _currentChatId = widget.chatId;
       if (_currentChatId != null) {
         await _loadChatHistory(_currentChatId!);
+        if (!mounted) return;
       }
       _chatSession = _geminiService.startNewChat();
     }
@@ -82,6 +84,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
 
   Future<void> _loadChatHistory(String chatId) async {
     final messages = await _chatStorage.loadMessages(chatId);
+    if (!mounted) return;
     setState(() {
       _messages = messages.map((msg) => ChatMessage(
         text: msg['text'],
@@ -95,9 +98,21 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
 
   Future<void> _loadUsername() async {
     final userData = await _authService.getUserData();
+    if (!mounted) return;
     setState(() {
       _username = userData?['displayName'] ?? _authService.currentUser?.displayName ?? 'You';
     });
+  }
+
+  Future<void> _openSupportLink(Uri uri) async {
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal membuka tautan bantuan.'),
+        ),
+      );
+    }
   }
 
   Future<void> _sendMessage() async {
@@ -122,6 +137,12 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
         timestamp: DateTime.now(),
         username: _username ?? 'You',
       ));
+      _messages.add(ChatMessage(
+        text: '',
+        isUser: false,
+        timestamp: DateTime.now(),
+        username: 'Mindbot',
+      ));
       _isLoading = true;
     });
 
@@ -142,19 +163,45 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
       }
     }
 
+    String responseText = '';
     try {
-      final response = await _geminiService.sendMessage(_chatSession, messageText);
-      
+      await for (final partial in _geminiService.sendMessageStream(_chatSession, messageText)) {
+        if (!mounted) return;
+        responseText = partial;
+        if (_messages.isNotEmpty && !_messages.last.isUser) {
+          setState(() {
+            final lastIndex = _messages.length - 1;
+            _messages[lastIndex] = ChatMessage(
+              text: responseText,
+              isUser: false,
+              timestamp: DateTime.now(),
+              username: 'Mindbot',
+            );
+          });
+          _scrollToBottom();
+        }
+      }
+
+      if (responseText.isEmpty) {
+        if (!mounted) return;
+        responseText = 'Maaf, aku ga bisa kasih response sekarang. Coba lagi ya!';
+        if (_messages.isNotEmpty && !_messages.last.isUser) {
+          setState(() {
+            final lastIndex = _messages.length - 1;
+            _messages[lastIndex] = ChatMessage(
+              text: responseText,
+              isUser: false,
+              timestamp: DateTime.now(),
+              username: 'Mindbot',
+            );
+          });
+        }
+      }
+
       setState(() {
-        _messages.add(ChatMessage(
-          text: response,
-          isUser: false,
-          timestamp: DateTime.now(),
-          username: 'Mindbot',
-        ));
         _isLoading = false;
       });
-      
+
       _scrollToBottom();
 
       // Save bot response to Firestore
@@ -162,7 +209,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
         try {
           await _chatStorage.saveMessage(
             chatId: _currentChatId!,
-            text: response,
+            text: responseText,
             isUser: false,
             username: 'Mindbot',
           );
@@ -173,6 +220,9 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     } catch (e) {
       final errorMessage = 'Waduh, ada error nih. Coba lagi ya!';
       setState(() {
+        if (_messages.isNotEmpty && !_messages.last.isUser) {
+          _messages.removeLast();
+        }
         _messages.add(ChatMessage(
           text: errorMessage,
           isUser: false,
@@ -200,6 +250,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
@@ -335,6 +386,129 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                   ],
                 ),
               ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFF7F2), Color(0xFFFFFCFA)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFF0D7CC)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF3D2914).withOpacity(0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFFE5DA),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.shield_outlined,
+                            size: 18,
+                            color: Color(0xFF7A3E2D),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bantuan krisis',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF7A3E2D),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Pilih salah satu jalur bantuan di bawah ini kalau kamu merasa tidak aman.',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF8B5E50),
+                                  height: 1.35,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Sumber bantuan profesional yang tersedia:',
+                      style: GoogleFonts.urbanist(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                        color: const Color(0xFF8B5E50),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.count(
+                      crossAxisCount: MediaQuery.of(context).size.width > 500 ? 2 : 1,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: MediaQuery.of(context).size.width > 500 ? 2.6 : 4.2,
+                      children: [
+                        _buildSupportButton(
+                          icon: Icons.public,
+                          title: 'Into The Light',
+                          subtitle: 'Bantuan profesional nasional',
+                          onPressed: () => _openSupportLink(
+                            Uri.parse('https://intothelightid.org'),
+                          ),
+                        ),
+                        _buildSupportButton(
+                          icon: Icons.local_hospital_outlined,
+                          title: 'UGM Counseling',
+                          subtitle: 'Tel. +62 274 513163',
+                          onPressed: () => _openSupportLink(
+                            Uri.parse('tel:+62274513163'),
+                          ),
+                        ),
+                        _buildSupportButton(
+                          icon: Icons.phone_in_talk_outlined,
+                          title: 'Hotline 119',
+                          subtitle: 'Layanan darurat nasional',
+                          onPressed: () => _openSupportLink(
+                            Uri.parse('tel:119'),
+                          ),
+                        ),
+                        _buildSupportButton(
+                          icon: Icons.chat_bubble_outline,
+                          title: 'Kembali ke chat',
+                          subtitle: 'Kalau kamu cuma perlu ditemani',
+                          onPressed: () => _scrollToBottom(),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
             
             // Input field
             Container(
@@ -375,15 +549,6 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                                 border: InputBorder.none,
                               ),
                               onSubmitted: (_) => _sendMessage(),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              // TODO: Implement voice input
-                            },
-                            child: const Icon(
-                              Icons.mic,
-                              color: Color(0xFF999999),
                             ),
                           ),
                         ],
@@ -476,6 +641,107 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTypingBubble() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: const Color(0xFFA8B475),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Mindbot sedang mengetik...',
+              style: GoogleFonts.urbanist(
+                fontSize: 14,
+                color: const Color(0xFF999999),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSupportButton({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF3D2914),
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: const Color(0xFF3D2914).withOpacity(0.08)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFA8B475).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 18, color: const Color(0xFF3D2914)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.urbanist(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF3D2914),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.urbanist(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF7A6A60),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.arrow_outward_rounded, size: 16),
+        ],
       ),
     );
   }
@@ -585,6 +851,8 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                 ),
               ),
             )
+          else if (message.text.trim().isEmpty && _isLoading && index == _messages.length - 1)
+            _buildTypingBubble()
           else
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

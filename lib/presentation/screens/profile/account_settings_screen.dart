@@ -16,6 +16,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   bool _isLoading = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -40,30 +41,64 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     }
   }
 
-  Future<void> _exportData() async {
-    // TODO: Implement data export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Fitur ekspor data akan segera tersedia',
-          style: GoogleFonts.urbanist(),
-        ),
-        backgroundColor: const Color(0xFFA8B475),
-      ),
-    );
-  }
-
   Future<void> _saveChanges() async {
-    // TODO: Implement save functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Perubahan berhasil disimpan',
-          style: GoogleFonts.urbanist(),
+    if (_isSaving) return;
+
+    final displayName = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+
+    if (displayName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Username tidak boleh kosong',
+            style: GoogleFonts.urbanist(),
+          ),
+          backgroundColor: Colors.red,
         ),
-        backgroundColor: Colors.green,
-      ),
-    );
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final emailVerificationSent = await _authService.updateAccountSettings(
+        displayName: displayName,
+        email: email,
+      );
+
+      if (!mounted) return;
+
+      final message = emailVerificationSent
+          ? 'Perubahan disimpan. Cek email kamu untuk verifikasi perubahan alamat email.'
+          : 'Perubahan berhasil disimpan';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: GoogleFonts.urbanist(),
+          ),
+          backgroundColor: const Color(0xFF2E7D32),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal menyimpan perubahan: $e',
+            style: GoogleFonts.urbanist(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
   }
 
   @override
@@ -245,37 +280,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
                     const SizedBox(height: 32),
 
-                    // Export Data Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _exportData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFA8B475),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Ekspor Data Kamu',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
                     // Confirm Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _saveChanges,
+                        onPressed: _isSaving ? null : _saveChanges,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF3D2914),
                           foregroundColor: Colors.white,
@@ -285,13 +294,22 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: Text(
-                          'Konfirmasi',
-                          style: GoogleFonts.urbanist(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Konfirmasi',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                   ],

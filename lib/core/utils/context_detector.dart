@@ -19,8 +19,7 @@ class ContextDetector {
   }
 
   Future<void> _initializeSensors() async {
-    // TODO: Initialize motion sensors, device state detection
-    // Implementation akan menggunakan sensors_plus package
+    // Sensor wiring can be added later; keep initialization non-blocking.
   }
 
   /// Detect current user context for adaptive UI behavior
@@ -74,8 +73,7 @@ class ContextDetector {
   }
 
   Future<bool> _detectMotion() async {
-    // TODO: Implement motion detection using accelerometer
-    // For now, return false
+    // Motion detection is currently disabled and defaults to stationary.
     return false;
   }
 
@@ -122,7 +120,7 @@ class ContextDetector {
   }
 }
 
-// Placeholder classes - these will be defined in their respective files
+// Lightweight local models used by ContextDetector.
 class MoodEntry {
   final MoodType moodType;
   final DateTime timestamp;

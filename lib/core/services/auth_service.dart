@@ -236,4 +236,37 @@ class AuthService {
       'lastUpdatedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  /// Update account-level fields for the currently logged in user.
+  ///
+  /// Returns whether an email verification was sent for pending email change.
+  Future<bool> updateAccountSettings({
+    required String displayName,
+    required String email,
+  }) async {
+    final user = currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    final trimmedName = displayName.trim();
+    final trimmedEmail = email.trim();
+
+    bool emailVerificationSent = false;
+
+    if (trimmedName.isNotEmpty && trimmedName != (user.displayName ?? '')) {
+      await user.updateDisplayName(trimmedName);
+    }
+
+    if (trimmedEmail.isNotEmpty && trimmedEmail != (user.email ?? '')) {
+      await user.verifyBeforeUpdateEmail(trimmedEmail);
+      emailVerificationSent = true;
+    }
+
+    await _firestore.collection('users').doc(user.uid).update({
+      'displayName': trimmedName,
+      'email': trimmedEmail,
+      'lastUpdatedAt': FieldValue.serverTimestamp(),
+    });
+
+    return emailVerificationSent;
+  }
 }
