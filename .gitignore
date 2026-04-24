@@ -85,3 +85,10 @@ logs/
 # research_data/
 # user_study_results/
 # analytics_exports/
+
+# Temporary, build, and Third-party dependencies
+copilot-worktree/
+.copilot-worktree/
+ios/ThirdParty/
+ios/BoringSSL-GRPC-fixed.podspec
+build_log.txt

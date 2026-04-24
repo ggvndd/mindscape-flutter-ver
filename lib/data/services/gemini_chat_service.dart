@@ -15,6 +15,9 @@ class GeminiChatService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final String _systemPrompt;
+
+  static const String _crisisResponse =
+      'Aku di sini buat dengerin kamu, tapi ini terdengar sangat berat dan kamu berhak mendapat bantuan dari profesional. Tolong jangan lewati ini sendirian. Kamu bisa hubungi layanan darurat atau konseling psikologi terdekat, atau akses Into The Light Indonesia (intothelightid.org) untuk bantuan profesional. Keselamatanmu itu yang paling utama.';
   
   GeminiChatService({
     String? customSystemPrompt,
@@ -76,15 +79,16 @@ Expertise kamu:
 
 Response style:
 - Conversational dan relatable
-- Tanya follow-up questions untuk understand better
-- Kasih advice yang praktis dan actionable
+- Jawab singkat, to the point, dan praktis
+- Maksimal 2 paragraf pendek
+- Tanya follow-up questions hanya kalau memang perlu
 - Validate feelings dan experiences user
-- Pakai phrases seperti "Aku ngerti", "Gimana kabar kamu", "That sounds tough banget"
+- Pakai phrases seperti "Aku ngerti", "That sounds tough banget"
 
 Crisis handling:
-- Kalau user tanda-tanda depresi berat, self-harm, atau suicide ideation, gentle suggest professional help
-- Mention UGM counseling services atau Sejiwa kalau perlu
-- Never dismiss serious mental health concerns
+- Dilarang keras memberi diagnosa medis/psikologis atau menyarankan pengobatan klinis
+- Kalau user mengarah ke self-harm, suicide, keputusasaan ekstrem, atau depresi klinis berat, hentikan persona kasual dan balas dengan template krisis yang sangat singkat dan tidak menambahkan teks lain
+- Utamakan keselamatan user dan arahkan ke bantuan profesional
 
 Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure kombinasi kuliah + kerja, plus financial pressure dan family expectations.
 ''';
@@ -97,6 +101,10 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
     }
   ) async {
     try {
+      if (_containsCrisisKeywords(message)) {
+        return _crisisResponse;
+      }
+
       final user = _auth.currentUser;
       if (user == null) throw Exception('User not authenticated');
       
@@ -245,8 +253,22 @@ Context: Kamu ngomong sama mahasiswa Indonesia yang deal dengan unique pressure 
   /// Check if message contains crisis-related keywords
   bool _containsCrisisKeywords(String message) {
     final crisisKeywords = [
-      'bunuh diri', 'suicide', 'mati aja', 'gak kuat lagi', 'putus asa',
-      'depresi berat', 'panic attack', 'self harm', 'cutting', 'menyakiti diri'
+      'bunuh diri',
+      'suicide',
+      'mati aja',
+      'gak kuat lagi',
+      'ga kuat lagi',
+      'tidak kuat lagi',
+      'putus asa',
+      'keputusasaan ekstrem',
+      'depresi berat',
+      'depresi klinis',
+      'panic attack',
+      'self harm',
+      'self-harm',
+      'cutting',
+      'menyakiti diri',
+      'melukai diri',
     ];
     
     final lowerMessage = message.toLowerCase();

@@ -11,15 +11,35 @@ class GeminiChatService {
   /// Optional mood-history block injected before the first user message.
   String? _moodContext;
 
+  static const String _crisisResponse =
+      'Aku di sini buat dengerin kamu, tapi ini terdengar sangat berat dan kamu berhak mendapat bantuan dari profesional. Tolong jangan lewati ini sendirian. Kamu bisa hubungi layanan darurat atau konseling psikologi terdekat, atau akses Into The Light Indonesia (intothelightid.org) untuk bantuan profesional. Keselamatanmu itu yang paling utama.';
+
+  static const List<String> _crisisKeywords = [
+    'bunuh diri',
+    'suicide',
+    'self harm',
+    'self-harm',
+    'melukai diri',
+    'menyakiti diri',
+    'gak kuat lagi',
+    'ga kuat lagi',
+    'tidak kuat lagi',
+    'mati aja',
+    'putus asa',
+    'depresi berat',
+    'depresi klinis',
+    'keputusasaan ekstrem',
+  ];
+
   static const String _systemPrompt =
       'Kamu adalah MindBot, teman virtual yang supportive buat orang-orang yang punya side gig atau kesibukan extra. '
       'Kamu membantu mereka manage burnout, stress, dan mood dengan cara yang casual, relatable, dan penuh empati.\n\n'
       'ATURAN FORMAT RESPONSE (WAJIB DIIKUTI):\n'
-      '- Maksimal 3 paragraf pendek per response.\n'
-      '- Setiap paragraf maksimal 2-3 kalimat.\n'
+      '- Maksimal 2 paragraf pendek per response.\n'
+      '- Setiap paragraf maksimal 1-2 kalimat.\n'
       '- Pisahkan tiap paragraf dengan satu baris kosong.\n'
       '- Jangan pakai teks bold, italic, bullet point, atau markdown apapun. Fully teks biasa.\n'
-      '- Jangan bertele-tele atau mengulangi hal yang sama.\n\n'
+      '- Jawab singkat, to the point, dan jangan mengulang ide yang sama.\n\n'
       'ATURAN NANYA PERASAAN (SANGAT PENTING):\n'
       '- DILARANG KERAS menanyakan variasi dari "kamu oke ga?", "gimana kabarmu?", "lu baik-baik aja?", "how are you?", atau sejenisnya di setiap response.\n'
       '- Tanya soal perasaan mereka HANYA kalau SALAH SATU kondisi ini terpenuhi:\n'
@@ -27,6 +47,11 @@ class GeminiChatService {
       '  2) User baru cerita sesuatu yang berat atau emosional.\n'
       '  3) Sudah lebih dari 6 pesan tanpa ada check-in sama sekali.\n'
       '- Di luar kondisi itu: langsung kasih respons yang helpful, supportif, atau actionable. Tidak perlu check-in.\n\n'
+      'ATURAN KEAMANAN DAN CRISIS INTERVENTION (PRIORITAS TERTINGGI):\n'
+      '- Kamu dilarang keras memberikan diagnosa medis, psikologis, atau menyarankan pengobatan klinis.\n'
+      '- Jika user mengetik kata kunci atau konteks yang mengarah pada: melukai diri sendiri (self-harm), bunuh diri (suicide), keputusasaan ekstrem, atau depresi klinis berat.\n'
+      '- MAKA kamu HARUS menghentikan persona kasualmu dan HANYA membalas dengan template respons krisis berikut, tanpa tambahan teks apapun:\n'
+      '"Aku di sini buat dengerin kamu, tapi ini terdengar sangat berat dan kamu berhak mendapat bantuan dari profesional. Tolong jangan lewati ini sendirian. Kamu bisa hubungi layanan darurat atau konseling psikologi terdekat, atau akses Into The Light Indonesia (intothelightid.org) untuk bantuan profesional. Keselamatanmu itu yang paling utama."\n\n'
       'GAYA BAHASA:\n'
       '- Gunakan bahasa Indonesia yang santai: "nih", "banget", "yuk", "sih", "beneran", dll.\n'
       '- Empathetic tapi tidak over-protective atau menggurui.\n'
@@ -35,9 +60,15 @@ class GeminiChatService {
 
   GeminiChatService() {
     _model = GenerativeModel(
-      model: ApiConfig.geminiFlashModel, // Using free tier Gemma model
+      model: ApiConfig.geminiFlashModel,
       apiKey: ApiConfig.geminiApiKey,
-      // Note: Gemma models don't support systemInstruction
+      systemInstruction: Content.system(_systemPrompt),
+      safetySettings: [
+        SafetySetting(HarmCategory.harassment, HarmBlockThreshold.none),
+        SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.none),
+        SafetySetting(HarmCategory.sexuallyExplicit, HarmBlockThreshold.none),
+        SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.none),
+      ],
     );
   }
 
@@ -104,6 +135,11 @@ class GeminiChatService {
 
   // ── Messaging ─────────────────────────────────────────────────────────────
 
+  bool _containsCrisisKeywords(String message) {
+    final lowerMessage = message.toLowerCase();
+    return _crisisKeywords.any((keyword) => lowerMessage.contains(keyword));
+  }
+
   /// Post-process the model response: convert any literal escape sequences
   /// (e.g. the 4-char string \n\n) the model echoes back into real newlines.
   String _normalizeResponse(String raw) {
@@ -116,13 +152,13 @@ class GeminiChatService {
   /// Send a message and get response
   Future<String> sendMessage(ChatSession chat, String message) async {
     try {
-      // For Gemma models, prepend system prompt (and optional mood context)
-      // to the very first message of the session.
+      if (_containsCrisisKeywords(message)) {
+        return _crisisResponse;
+      }
+
       final String prompt;
-      if (chat.history.isEmpty) {
-        final moodBlock =
-            _moodContext != null ? '\n\n$_moodContext\n\n${'=' * 50}' : '';
-        prompt = '$_systemPrompt$moodBlock\n\n${'=' * 50}\n\nUser: $message';
+      if (chat.history.isEmpty && _moodContext != null) {
+        prompt = '$_moodContext\n\n${'=' * 50}\n\nUser: $message';
       } else {
         prompt = message;
       }
@@ -132,6 +168,46 @@ class GeminiChatService {
       return _normalizeResponse(raw);
     } catch (e) {
       return 'Waduh, ada error nih: $e. Mind coba lagi?';
+    }
+  }
+
+  /// Send a message and stream the response as it arrives.
+  Stream<String> sendMessageStream(ChatSession chat, String message) async* {
+    try {
+      if (_containsCrisisKeywords(message)) {
+        yield _crisisResponse;
+        return;
+      }
+
+      final String prompt;
+      if (chat.history.isEmpty && _moodContext != null) {
+        prompt = '$_moodContext\n\n${'=' * 50}\n\nUser: $message';
+      } else {
+        prompt = message;
+      }
+
+      final responseStream = chat.sendMessageStream(Content.text(prompt));
+      var previousText = '';
+      var accumulatedText = '';
+
+      await for (final chunk in responseStream) {
+        final currentText = chunk.text ?? '';
+        final delta = currentText.startsWith(previousText)
+            ? currentText.substring(previousText.length)
+            : currentText;
+        previousText = currentText;
+
+        if (delta.isEmpty) continue;
+
+        accumulatedText += delta;
+        yield _normalizeResponse(accumulatedText);
+      }
+
+      if (accumulatedText.isEmpty) {
+        yield 'Maaf, aku ga bisa kasih response sekarang. Coba lagi ya!';
+      }
+    } catch (e) {
+      yield 'Waduh, ada error nih: $e. Mind coba lagi?';
     }
   }
 

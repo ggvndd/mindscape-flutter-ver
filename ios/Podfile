@@ -24,12 +24,14 @@ def flutter_root
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+require 'fileutils'
 
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks!
   use_modular_headers!
+
+  pod 'BoringSSL-GRPC', :path => File.join(__dir__, 'ThirdParty', 'BoringSSL-GRPC')
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
@@ -43,6 +45,31 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'gnu++17'
+      config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+      config.build_settings['DEFINES_MODULE'] = 'YES'
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+    end
+  end
+end
+
+post_integrate do |installer|
+  # Workaround for CocoaPods 1.15+ gRPC-Core headers path issue under use_modular_headers!
+  grpc_private_dir = File.join(installer.sandbox.headers_root.to_s, 'Private/grpc')
+  FileUtils.mkdir_p(grpc_private_dir)
+  module_map_src = File.join(installer.sandbox.target_support_files_dir('gRPC-Core'), 'gRPC-Core.modulemap')
+  module_map_dest = File.join(grpc_private_dir, 'gRPC-Core.modulemap')
+  if File.exist?(module_map_src)
+    FileUtils.cp(module_map_src, module_map_dest)
+  end
+
+  # Remove rogue -weak_framework FirebaseFirestoreInternal from Pods-Runner xcconfigs
+  runner_xcconfig_dir = installer.sandbox.target_support_files_dir('Pods-Runner')
+  if File.directory?(runner_xcconfig_dir)
+    Dir.glob(File.join(runner_xcconfig_dir, '*.xcconfig')).each do |xcconfig|
+      content = File.read(xcconfig)
+      new_content = content.gsub(/-weak_framework\s+"FirebaseFirestoreInternal"/, '')
+      File.write(xcconfig, new_content) if content != new_content
     end
   end
 end

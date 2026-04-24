@@ -1464,8 +1464,11 @@ PODS:
     - CwlCatchException
     - Flutter
     - FlutterMacOS
+  - url_launcher_ios (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
+  - BoringSSL-GRPC (from `/Users/gvnd/Documents/Repo/mindscape_flutter/ios/ThirdParty/BoringSSL-GRPC`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
@@ -1480,11 +1483,11 @@ DEPENDENCIES:
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - speech_to_text (from `.symlinks/plugins/speech_to_text/darwin`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
   trunk:
     - abseil
-    - BoringSSL-GRPC
     - CwlCatchException
     - CwlCatchExceptionSupport
     - Firebase
@@ -1511,6 +1514,8 @@ SPEC REPOS:
     - RecaptchaInterop
 
 EXTERNAL SOURCES:
+  BoringSSL-GRPC:
+    :path: "/Users/gvnd/Documents/Repo/mindscape_flutter/ios/ThirdParty/BoringSSL-GRPC"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   device_info_plus:
@@ -1539,10 +1544,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   speech_to_text:
     :path: ".symlinks/plugins/speech_to_text/darwin"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
-  BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
+  BoringSSL-GRPC: 67dcd0bd9e922e8497866b2c4ac0edc3abb1369a
   cloud_firestore: fdcc87898326e396d6ef6df543acf9b5c2034b95
   CwlCatchException: 7acc161b299a6de7f0a46a6ed741eae2c8b4d75a
   CwlCatchExceptionSupport: 54ccab8d8c78907b57f99717fb19d4cc3bce02dc
@@ -1581,7 +1588,8 @@ SPEC CHECKSUMS:
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   speech_to_text: 3b313d98516d3d0406cea424782ec25470c59d19
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
-PODFILE CHECKSUM: 5215c3b5186d22d13a4edc98275bd456d651e2e4
+PODFILE CHECKSUM: df6ec9dda66125d8f01365c79099ffac0b6702e4
 
 COCOAPODS: 1.16.2

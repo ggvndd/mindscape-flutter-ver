@@ -38,6 +38,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
   bool _isLoading = false;
   String? _username;
   String? _currentChatId;
+  bool _showCrisisSupport = false;
 
   @override
   void initState() {
@@ -105,13 +106,28 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
   }
 
   Future<void> _openSupportLink(Uri uri) async {
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gagal membuka tautan bantuan.'),
-        ),
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: uri.scheme == 'tel'
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
       );
+      if (!launched && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(uri.scheme == 'tel' 
+                ? 'Gagal membuka telepon. Pastikan perangkatmu mendukung panggilan seluler.'
+                : 'Gagal membuka tautan bantuan.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: Tidak dapat membuka ${uri.scheme == "tel" ? "telepon" : "tautan"}.')),
+        );
+      }
     }
   }
 
@@ -324,23 +340,63 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Title
-                  Text(
-                    'Mindbot',
-                    style: GoogleFonts.urbanist(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF3D2914),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Start time
-                  Text(
-                    'Chat dimulai pada ${dateFormat.format(DateTime.now())}',
-                    style: GoogleFonts.urbanist(
-                      fontSize: 14,
-                      color: const Color(0xFF999999),
-                    ),
+                  // Title and Start time with SOS button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mindbot',
+                            style: GoogleFonts.urbanist(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF3D2914),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Chat dimulai pada ${dateFormat.format(DateTime.now())}',
+                            style: GoogleFonts.urbanist(
+                              fontSize: 14,
+                              color: const Color(0xFF999999),
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _showCrisisSupport = !_showCrisisSupport;
+                            if (_showCrisisSupport) {
+                              FocusScope.of(context).unfocus();
+                            }
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFE5DA),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.shield_outlined, color: Color(0xFF7A3E2D), size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Bantuan',
+                                style: GoogleFonts.urbanist(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF7A3E2D),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -354,42 +410,16 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
-                  return _buildMessageBubble(message, timeFormat);
+                  return _buildMessageBubble(message, timeFormat, index);
                 },
               ),
             ),
             
-            // Loading indicator
-            if (_isLoading)
+            // Removed the extra loading indicator; Handled directly in message stream
+            if (_showCrisisSupport)
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 40),
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFFA8B475),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Mindbot sedang mengetik...',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                        color: const Color(0xFF999999),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -501,7 +531,12 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                           icon: Icons.chat_bubble_outline,
                           title: 'Kembali ke chat',
                           subtitle: 'Kalau kamu cuma perlu ditemani',
-                          onPressed: () => _scrollToBottom(),
+                          onPressed: () {
+                            setState(() {
+                              _showCrisisSupport = false;
+                            });
+                            _scrollToBottom();
+                          },
                         ),
                       ],
                     ),
@@ -541,6 +576,13 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                           Expanded(
                             child: TextField(
                               controller: _messageController,
+                              onTap: () {
+                                if (_showCrisisSupport) {
+                                  setState(() {
+                                    _showCrisisSupport = false;
+                                  });
+                                }
+                              },
                               decoration: InputDecoration(
                                 hintText: 'Write your message',
                                 hintStyle: GoogleFonts.urbanist(
@@ -746,7 +788,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message, DateFormat timeFormat) {
+  Widget _buildMessageBubble(ChatMessage message, DateFormat timeFormat, int index) {
     // Split bot messages into separate paragraph bubbles
     final paragraphs = message.isUser
         ? <String>[message.text]
