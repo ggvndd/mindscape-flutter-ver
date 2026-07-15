@@ -12,7 +12,11 @@ class GeminiChatService {
   String? _moodContext;
 
   static const String _crisisResponse =
-      'Aku di sini buat dengerin kamu, tapi ini terdengar sangat berat dan kamu berhak mendapat bantuan dari profesional. Tolong jangan lewati ini sendirian. Kamu bisa hubungi layanan darurat atau konseling psikologi terdekat, atau akses Into The Light Indonesia (intothelightid.org) untuk bantuan profesional. Keselamatanmu itu yang paling utama.';
+      'Aku di sini buat dengerin kamu, tapi ini terdengar sangat berat dan kamu berhak mendapat bantuan dari profesional. Klik tombol di bawah untuk panduan bantuan lebih lanjut. Tolong jangan lewati ini sendirian. Kamu bisa hubungi layanan darurat atau konseling psikologi terdekat, atau akses Into The Light Indonesia (intothelightid.org) untuk bantuan profesional. Keselamatanmu itu yang paling utama.';
+
+  static bool isCrisisResponse(String response) {
+    return response.trim() == _crisisResponse;
+  }
 
   static const List<String> _crisisKeywords = [
     'bunuh diri',
@@ -47,6 +51,13 @@ class GeminiChatService {
       '  2) User baru cerita sesuatu yang berat atau emosional.\n'
       '  3) Sudah lebih dari 6 pesan tanpa ada check-in sama sekali.\n'
       '- Di luar kondisi itu: langsung kasih respons yang helpful, supportif, atau actionable. Tidak perlu check-in.\n\n'
+      'IDENTIFIKASI TRIGGER DAN SELF-MONITORING (CBT APPROACH):\n'
+      '- Ketika user cerita tentang mood yang berubah atau feeling overwhelmed, tanya gentle follow-up untuk membantu mereka identify trigger.\n'
+      '- Contoh pertanyaan: "Kamu notice nggak sih ada pattern? Kayak kapan biasanya kamu feel kayak gini?", "Apa yang happened sebelumnya?", "Apa sih yang bikin kamu overwhelmed?".\n'
+      '- Bantu mereka connect triggers dengan emosi: "Jadi tight deadline + kurang tidur = overwhelmed ya?", "Sepertinya deadlines academic bikin kamu stress ya?".\n'
+      '- Encourage self-monitoring: "Good job noticing ini ya! That\'s the first step to manage stress better", "Kalo kamu tau apa yang trigger-nya, jadi lebih gampang manage".\n'
+      '- Jangan force mereka identify trigger - kalau mereka tidak tahu, itu okay. Normalize it: "Kadang sulit sih identify apa exactly yang bikin kita stress".\n'
+      '- Gunakan trigger patterns yang udah kamu tau dari mood history mereka untuk memberikan insight yang personalized.\n\n'
       'ATURAN KEAMANAN DAN CRISIS INTERVENTION (PRIORITAS TERTINGGI):\n'
       '- Kamu dilarang keras memberikan diagnosa medis, psikologis, atau menyarankan pengobatan klinis.\n'
       '- Jika user mengetik kata kunci atau konteks yang mengarah pada: melukai diri sendiri (self-harm), bunuh diri (suicide), keputusasaan ekstrem, atau depresi klinis berat.\n'
@@ -56,13 +67,17 @@ class GeminiChatService {
       '- Gunakan bahasa Indonesia yang santai: "nih", "banget", "yuk", "sih", "beneran", dll.\n'
       '- Empathetic tapi tidak over-protective atau menggurui.\n'
       '- Kalau user nanya hal di luar topik burnout/mood, tetap jawab dengan santai tapi arahkan balik ke topik.\n'
-      '- Jangan terlalu formal, tapi tetap genuine dan helpful.';
+      '- Jangan terlalu formal, tapi tetap genuine dan helpful.\n\n'
+      'ATURAN OUTPUT (SANGAT PENTING):\n'
+      '- Karena kamu adalah model dengan kemampuan reasoning, kamu mungkin akan mencetak analisis atau draf (chain of thought) terlebih dahulu.\n'
+      '- Pesan final yang ditujukan untuk dibaca oleh user WAJIB dibungkus dengan tag <response> dan </response>.\n'
+      '- Contoh: <response>Hai! Aku di sini kok buat nemenin kamu.</response>';
 
-  GeminiChatService() {
+      GeminiChatService() {
     _model = GenerativeModel(
       model: ApiConfig.geminiFlashModel,
       apiKey: ApiConfig.geminiApiKey,
-      systemInstruction: Content.system(_systemPrompt),
+      // Note: Gemma models don't support systemInstruction natively, so we prepend it to the first message
       safetySettings: [
         SafetySetting(HarmCategory.harassment, HarmBlockThreshold.none),
         SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.none),
@@ -143,7 +158,22 @@ class GeminiChatService {
   /// Post-process the model response: convert any literal escape sequences
   /// (e.g. the 4-char string \n\n) the model echoes back into real newlines.
   String _normalizeResponse(String raw) {
-    return raw
+    String normalized = raw;
+    
+    // Extract everything after <response> if the model used it
+    final parts = normalized.split(RegExp(r'<response>\s*'));
+    if (parts.length > 1) {
+      normalized = parts.last;
+      // Remove closing tag if it exists
+      normalized = normalized.replaceAll(RegExp(r'</response>\s*'), '');
+    }
+
+    // Strip <think>...</think> and <scratchpad>...</scratchpad> blocks just in case
+    normalized = normalized
+        .replaceAll(RegExp(r'<think>.*?</think>', dotAll: true), '')
+        .replaceAll(RegExp(r'<scratchpad>.*?</scratchpad>', dotAll: true), '');
+    
+    return normalized
         .replaceAll(r'\n\n', '\n\n') // literal \n\n → two real newlines
         .replaceAll(r'\n', '\n')      // literal \n  → one real newline
         .trim();
@@ -157,8 +187,9 @@ class GeminiChatService {
       }
 
       final String prompt;
-      if (chat.history.isEmpty && _moodContext != null) {
-        prompt = '$_moodContext\n\n${'=' * 50}\n\nUser: $message';
+      if (chat.history.isEmpty) {
+        final contextStr = _moodContext != null ? '$_moodContext\n\n${'=' * 50}\n\n' : '';
+        prompt = '$_systemPrompt\n\n$contextStr' 'User: $message';
       } else {
         prompt = message;
       }
@@ -180,32 +211,19 @@ class GeminiChatService {
       }
 
       final String prompt;
-      if (chat.history.isEmpty && _moodContext != null) {
-        prompt = '$_moodContext\n\n${'=' * 50}\n\nUser: $message';
+      if (chat.history.isEmpty) {
+        final contextStr = _moodContext != null ? '$_moodContext\n\n${'=' * 50}\n\n' : '';
+        prompt = '$_systemPrompt\n\n$contextStr' 'User: $message';
       } else {
         prompt = message;
       }
 
-      final responseStream = chat.sendMessageStream(Content.text(prompt));
-      var previousText = '';
-      var accumulatedText = '';
-
-      await for (final chunk in responseStream) {
-        final currentText = chunk.text ?? '';
-        final delta = currentText.startsWith(previousText)
-            ? currentText.substring(previousText.length)
-            : currentText;
-        previousText = currentText;
-
-        if (delta.isEmpty) continue;
-
-        accumulatedText += delta;
-        yield _normalizeResponse(accumulatedText);
-      }
-
-      if (accumulatedText.isEmpty) {
-        yield 'Maaf, aku ga bisa kasih response sekarang. Coba lagi ya!';
-      }
+      // Workaround for Gemma 3 streaming SDK bug (Unhandled format for Content: {role: model})
+      // The current google_generative_ai SDK crashes on Gemma's stream format.
+      // Since Gemma 3 4B responds in ~1 second, we can safely fall back to non-streaming.
+      final response = await chat.sendMessage(Content.text(prompt));
+      final raw = response.text ?? 'Maaf, aku ga bisa kasih response sekarang. Coba lagi ya!';
+      yield _normalizeResponse(raw);
     } catch (e) {
       yield 'Waduh, ada error nih: $e. Mind coba lagi?';
     }

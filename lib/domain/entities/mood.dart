@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Mood {
   final String id;
   final String userId;
-  final String mood; // gloomy, sad, justokay, fine, happy, cheerful
-  final int moodScore; // 0, 20, 40, 60, 80, 100
+  final String mood; // gloomy, sad, justokay, fine, cheerful
+  final int moodScore; // 0, 25, 50, 75, 100
   final DateTime timestamp;
   final String? note;
 
@@ -47,17 +47,15 @@ class Mood {
       case 'gloomy':
         return 0;
       case 'sad':
-        return 20;
+        return 25;
       case 'justokay':
-        return 40;
+        return 50;
       case 'fine':
-        return 60;
-      case 'happy':
-        return 80;
+        return 75;
       case 'cheerful':
         return 100;
       default:
-        return 60;
+        return 50;
     }
   }
 
@@ -65,19 +63,17 @@ class Mood {
   String getMoodDisplayName() {
     switch (mood) {
       case 'gloomy':
-        return 'Gloomy';
+        return 'Sangat Kewalahan';
       case 'sad':
-        return 'Sad';
+        return 'Stres / Lelah';
       case 'justokay':
-        return 'Just Okay';
+        return 'Biasa Aja';
       case 'fine':
-        return 'Fine';
-      case 'happy':
-        return 'Happy';
+        return 'Baik / Nyaman';
       case 'cheerful':
-        return 'Cheerful';
+        return 'Sangat Berenergi';
       default:
-        return 'Fine';
+        return 'Biasa Aja';
     }
   }
 

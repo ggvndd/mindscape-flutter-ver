@@ -112,7 +112,8 @@ class GemmaMoodResponseService {
             'INSTRUKSI WAJIB:\n'
             '- Balas MAKSIMAL 2 kalimat pendek. Tidak boleh lebih dari 2 kalimat.\n'
             '- Akui bahwa mereka lagi sibuk, kasih validasi singkat dan hangat.\n'
-            '- JANGAN tanya pertanyaan terbuka yang butuh jawaban panjang.\n'
+            '- Kalau mood mereka drop significantly, bisa kasih short trigger cue: "Seems like rush hour mode impact mood kamu ya.".\n'
+            '- JANGAN tanya pertanyaan terbuka yang butuh jawaban panjang—nanti mereka sibuk dan makin stressed.\n'
             '- Bahasa Indonesia santai: "nih", "banget", "yuk", "sih", dll.\n'
             '- Teks biasa saja, tidak ada markdown, bold, atau bullet point.\n\n'
             'Balas sekarang:';
@@ -128,7 +129,11 @@ class GemmaMoodResponseService {
             '- Balas 3-4 kalimat.\n'
             '- Gunakan riwayat mood DAN catatan hari ini untuk respons yang '
             'personal dan relevan dengan situasi mereka.\n'
-            '- Akhiri dengan SATU pertanyaan lembut yang relevan.\n'
+            '- PENTING: Jika mood berubah signifikan atau ada shift pattern, gently tanya untuk trigger identification.\n'
+            '  Contoh: "Mood-nya drop ya dibanding kemarin. Ada yang happened?", "Apa sih yang bikin kamu feel kayak gini?".\n'
+            '- Kalau mereka mention specific trigger, acknowledge dan reinforce self-awareness: '
+            '"Good observation! Knowing apa yang trigger stress is the first step.".\n'
+            '- Akhiri dengan pertanyaan yang helpful dan relevant—bisa tentang situasi atau cara coping.\n'
             '- Bahasa Indonesia santai: "nih", "banget", "yuk", "sih", dll.\n'
             '- Teks biasa saja, tidak ada markdown, bold, atau bullet point.\n\n'
             'Balas sekarang:';

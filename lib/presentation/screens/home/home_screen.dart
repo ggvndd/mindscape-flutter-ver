@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/mood_service.dart';
 import '../../../core/services/chat_storage_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../domain/entities/mood.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../mindbot/mindbot_screen.dart';
@@ -61,11 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
       final userId = _authService.currentUser?.uid;
       if (userId == null) return;
 
+      final now = DateTime.now();
       final mindScore = await _moodService.calculateMindscore(userId);
       final latestMood = await _moodService.getLatestMood(userId);
+        final intervalHours = await NotificationService.getSavedInterval();
+        final latestMoodInInterval =
+          (latestMood != null &&
+              _isMoodWithinInterval(latestMood.timestamp, now, intervalHours))
+            ? latestMood
+            : null;
       
       // Calculate the start of the week (7 days ago)
-      final now = DateTime.now();
       final weekStart = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
       final weeklyData = await _moodService.getWeeklyMoodData(
         userId: userId,
@@ -74,12 +81,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         _mindScore = mindScore;
-        _latestMood = latestMood;
+        _latestMood = latestMoodInInterval;
         _weeklyMoodData = weeklyData;
       });
     } catch (e) {
       // Handle error silently
     }
+  }
+
+  bool _isMoodWithinInterval(DateTime moodTime, DateTime now, int hours) {
+    final diff = now.difference(moodTime);
+    if (diff.isNegative) return false;
+    return diff <= Duration(hours: hours);
+  }
+
+  String _getMindbotMindscoreReview() {
+    if (_mindScore == null) {
+      return 'Mindbot bilang: Yuk mulai log mood hari ini biar aku bisa kasih insight yang lebih personal buat kamu.';
+    }
+
+    final score = _mindScore!;
+    if (score <= 25) {
+      return 'Mindbot bilang: Hari ini mungkin cukup berat. Pelan-pelan aja, satu hal kecil yang bikin kamu lega itu sudah progress.';
+    }
+    if (score <= 50) {
+      return 'Mindbot bilang: So-so aja hari ini? Itu valid banget. Coba kasih diri kamu jeda kecil, nanti energi kamu bisa pelan-pelan balik.';
+    }
+    if (score <= 75) {
+      return 'Mindbot bilang: Kamu lagi di jalur yang cukup stabil. Pertahankan ritme ini dan jangan lupa kasih credit ke diri sendiri.';
+    }
+    return 'Mindbot bilang: Vibenya lagi bagus! Simpan momentum ini dengan rutinitas kecil yang sehat biar mood baikmu tetap konsisten.';
   }
 
   Future<void> _loadConversationCount() async {
@@ -316,6 +347,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             Expanded(child: _buildCurrentMoodCard()),
                           ],
                         ),
+
+                        const SizedBox(height: 12),
+                        _buildMindbotReviewCard(),
                         
                         const SizedBox(height: 24),
                         
@@ -456,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const MindscoreDetailScreen()),
-        );
+        ).then((_) => _loadMoodData());
       },
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -555,20 +589,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getMoodLevel(int score) {
-    if (score <= 20) return 'Murung';
-    if (score <= 40) return 'Sedih';
-    if (score <= 60) return 'Lumayan';
-    if (score <= 80) return 'Oke';
-    if (score <= 99) return 'Senang';
-    return 'Ceria';
+    if (score <= 25) return 'Kewalahan';
+    if (score <= 50) return 'Stres';
+    if (score <= 75) return 'Biasa';
+    if (score <= 99) return 'Nyaman';
+    return 'Berenergi';
   }
 
   Widget _buildCurrentMoodCard() {
-    String moodName = 'N/A';
     String moodIcon = 'assets/logos/moods/mood_justokay.svg';
     
     if (_latestMood != null) {
-      moodName = _latestMood!.getMoodDisplayName();
       moodIcon = 'assets/logos/moods/mood_${_latestMood!.mood}.svg';
     }
 
@@ -577,7 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const MoodTrackerScreen()),
-        );
+        ).then((_) => _loadMoodData());
       },
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -646,6 +677,54 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMindbotReviewCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFFA8B475).withOpacity(0.18),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.psychology_alt,
+              size: 18,
+              color: Color(0xFF7F9457),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _getMindbotMindscoreReview(),
+              style: GoogleFonts.urbanist(
+                fontSize: 14,
+                height: 1.5,
+                color: const Color(0xFF3D2914),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

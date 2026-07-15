@@ -14,7 +14,6 @@ class MoodDataSeeder {
     'sad', 
     'justokay',
     'fine',
-    'happy',
     'cheerful',
   ];
 
@@ -36,12 +35,11 @@ class MoodDataSeeder {
   int getMoodScore(String mood) {
     switch (mood) {
       case 'gloomy': return 0;
-      case 'sad': return 20;
-      case 'justokay': return 40;
-      case 'fine': return 60;
-      case 'happy': return 80;
+      case 'sad': return 25;
+      case 'justokay': return 50;
+      case 'fine': return 75;
       case 'cheerful': return 100;
-      default: return 60;
+      default: return 50;
     }
   }
 
@@ -77,14 +75,14 @@ class MoodDataSeeder {
           String selectedMood;
           final moodRoll = random.nextInt(100);
           if (moodRoll < 10) {
-            // 10% negative
-            selectedMood = moods[random.nextInt(2)]; // gloomy or sad
+            // 10% negative: gloomy or sad
+            selectedMood = moods[random.nextInt(2)];
           } else if (moodRoll < 40) {
-            // 30% neutral
-            selectedMood = moods[2 + random.nextInt(2)]; // justokay or fine
+            // 30% neutral: justokay
+            selectedMood = moods[2];
           } else {
-            // 60% positive
-            selectedMood = moods[4 + random.nextInt(2)]; // happy or cheerful
+            // 60% positive: fine or cheerful
+            selectedMood = moods[3 + random.nextInt(2)];
           }
 
           final note = sampleNotes[random.nextInt(sampleNotes.length)];
@@ -128,11 +126,11 @@ class MoodDataSeeder {
     
     final todayMoods = [
       {'time': 7, 'mood': 'fine', 'note': 'Bangun pagi, siap untuk hari ini'},
-      {'time': 10, 'mood': 'happy', 'note': 'Kelas pagi berjalan lancar'},
+      {'time': 10, 'mood': 'cheerful', 'note': 'Kelas pagi berjalan lancar'},
       {'time': 13, 'mood': 'cheerful', 'note': 'Makan siang bareng temen'},
       {'time': 16, 'mood': 'justokay', 'note': 'Mulai agak capek'},
       {'time': 19, 'mood': 'fine', 'note': 'Santai di kos'},
-      {'time': 22, 'mood': 'happy', 'note': 'Nonton series favorit'},
+      {'time': 22, 'mood': 'cheerful', 'note': 'Nonton series favorit'},
     ];
 
     try {

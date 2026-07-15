@@ -382,7 +382,7 @@ class MoodService {
         'hour': 11,
       },
       {
-        'mood': 'happy',
+        'mood': 'cheerful',
         'note': 'Semangat mulai minggu baru!',
         'daysAgo': 0,
         'hour': 9,

@@ -29,7 +29,7 @@ require 'fileutils'
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_modular_headers!
+  use_frameworks!
 
   pod 'BoringSSL-GRPC', :path => File.join(__dir__, 'ThirdParty', 'BoringSSL-GRPC')
 

@@ -31,7 +31,8 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   final AuthService _authService = AuthService();
   final TextEditingController _noteController = TextEditingController();
   
-  int _selectedIndex = 2; // Default to "Just Okay" (middle)
+  int _selectedIndex = 2; // Default to "Biasa Aja" (middle)
+  int? _tappedIndex;
   bool _isLogging = false;
   bool _isLoadingResponse = false;
   String? _aiResponse;
@@ -50,39 +51,33 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   final List<Map<String, dynamic>> _moods = [
     {
       'name': 'gloomy',
-      'display': 'Depresi',
-      'label': 'Aku Lagi Depresi',
-      'color': Color(0xFF5B9FD4),  // Light blue
+      'display': 'Sangat Kewalahan',
+      'label': 'Aku Sangat Kewalahan',
+      'color': Color(0xFF6D4CC9),
     },
     {
       'name': 'sad',
-      'display': 'Sedih',
-      'label': 'Aku Lagi Sedih',
-      'color': Color(0xFFE89A5D),
+      'display': 'Stres / Lelah',
+      'label': 'Aku Stres / Lelah',
+      'color': Color(0xFFB68A9D),
     },
     {
       'name': 'justokay',
       'display': 'Biasa Aja',
       'label': 'Aku Biasa Aja',
-      'color': Color(0xFFF5C77E),
+      'color': Color(0xFFF2D08A),
     },
     {
       'name': 'fine',
-      'display': 'Senang',
-      'label': 'Aku Lagi Senang',
-      'color': Color(0xFFE89B7D),  // Warm coral
-    },
-    {
-      'name': 'happy',
-      'display': 'Sangat Senang',
-      'label': 'Aku Sangat Senang',
-      'color': Color(0xFFA8B475),
+      'display': 'Baik / Nyaman',
+      'label': 'Aku Nyaman / Tenang',
+      'color': Color(0xFF9FCEA6),
     },
     {
       'name': 'cheerful',
-      'display': 'Ceria',
-      'label': 'Aku Lagi Ceria',
-      'color': Color(0xFF7BA85B),
+      'display': 'Sangat Berenergi',
+      'label': 'Aku Sangat Berenergi',
+      'color': Color(0xFF66B87A),
     },
   ];
 
@@ -474,7 +469,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                       
                       const SizedBox(height: 32),
                       
-                      // Emoji
+                      // Emoji (large display - not interactive)
                       Container(
                         width: 140,
                         height: 140,
@@ -483,10 +478,16 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                           borderRadius: BorderRadius.circular(70),
                         ),
                         padding: const EdgeInsets.all(20),
-                        child: SvgPicture.asset(
-                          'assets/logos/moods/mood_${currentMood['name']}.svg',
-                          width: 100,
-                          height: 100,
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            backgroundColor,
+                            BlendMode.srcIn,
+                          ),
+                          child: SvgPicture.asset(
+                            'assets/logos/moods/mood_${currentMood['name']}.svg',
+                            width: 100,
+                            height: 100,
+                          ),
                         ),
                       ),
                       
@@ -653,37 +654,19 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
   List<Widget> _buildResponseChildren() {
     final Color bgColor = (_moods[_selectedIndex]['color'] as Color);
     return [
-      // MindBot header
+      // Centered MindBot heading
       Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.25),
-                shape: BoxShape.circle,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: SvgPicture.asset(
-                  'assets/logos/chatbot/Vector-1.svg',
-                  colorFilter: const ColorFilter.mode(
-                      Colors.white, BlendMode.srcIn),
-                ),
-              ),
+        child: Center(
+          child: Text(
+            'Mindbot bilang...',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.urbanist(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
-            const SizedBox(width: 10),
-            Text(
-              'MindBot',
-              style: GoogleFonts.urbanist(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       // Response card
@@ -788,7 +771,7 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Geser atau tekan titik untuk memilih',
+                    'Geser, tekan titik, atau ketuk emoji untuk memilih',
                     style: GoogleFonts.urbanist(
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
@@ -879,20 +862,37 @@ class _MoodLoggingDialogState extends State<MoodLoggingDialog>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(_moods.length, (index) {
                 final isSelected = index == _selectedIndex;
-                return SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: Opacity(
-                    opacity: isSelected ? 1.0 : 0.5,
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                      child: SvgPicture.asset(
-                        'assets/logos/moods/mood_${_moods[index]['name']}.svg',
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () async {
+                      setState(() => _selectedIndex = index);
+                      setState(() => _tappedIndex = index);
+                      await Future.delayed(const Duration(milliseconds: 150));
+                      if (!mounted) return;
+                      if (_tappedIndex == index) setState(() => _tappedIndex = null);
+                    },
+                    child: AnimatedScale(
+                      scale: isSelected ? 1.15 : (_tappedIndex == index ? 1.12 : 1.0),
+                      duration: const Duration(milliseconds: 120),
+                      child: SizedBox(
                         width: 28,
                         height: 28,
+                        child: Opacity(
+                          opacity: isSelected ? 1.0 : 0.5,
+                          child: ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                            child: SvgPicture.asset(
+                              'assets/logos/moods/mood_${_moods[index]['name']}.svg',
+                              width: 28,
+                              height: 28,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -932,7 +932,6 @@ class CurvedLinePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final spacing = size.width / (totalDots - 1);
     final baseY = size.height / 2;
     
     // Create smooth wave path
@@ -945,8 +944,7 @@ class CurvedLinePainter extends CustomPainter {
       final t = i / steps;
       final x = size.width * t;
       
-      // Smooth sine wave that dips in the middle
-      final angle = t * 3.14159; // 0 to PI for one wave
+      // Smooth parabola that dips in the middle
       final yOffset = -25 * (1 - (t * 2 - 1) * (t * 2 - 1)); // Smooth parabola
       final y = baseY + yOffset;
       

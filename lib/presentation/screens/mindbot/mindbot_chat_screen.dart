@@ -38,7 +38,6 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
   bool _isLoading = false;
   String? _username;
   String? _currentChatId;
-  bool _showCrisisSupport = false;
 
   @override
   void initState() {
@@ -129,6 +128,132 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
         );
       }
     }
+  }
+
+  Future<void> _openSupportSheet() async {
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFF7F2), Color(0xFFFFFCFA)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFF0D7CC)),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3D2914).withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFE5DA),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.shield_outlined,
+                          size: 18,
+                          color: Color(0xFF7A3E2D),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Bantuan cepat',
+                              style: GoogleFonts.urbanist(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF7A3E2D),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Pilih jalur bantuan yang paling cocok buat kamu.',
+                              style: GoogleFonts.urbanist(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF8B5E50),
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: const Icon(Icons.close),
+                        color: const Color(0xFF7A3E2D),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildSupportButton(
+                    icon: Icons.public,
+                    title: 'Into The Light',
+                    subtitle: 'Bantuan profesional nasional',
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _openSupportLink(Uri.parse('https://intothelightid.org'));
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSupportButton(
+                    icon: Icons.local_hospital_outlined,
+                    title: 'UGM Counseling',
+                    subtitle: 'Tel. +62 274 513163',
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _openSupportLink(Uri.parse('tel:+62274513163'));
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(sheetContext),
+                      child: Text(
+                        'Tutup',
+                        style: GoogleFonts.urbanist(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF7A3E2D),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _sendMessage() async {
@@ -308,38 +433,40 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Back button
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: const Color(0xFF3D2914), width: 1.5),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/logos/back.svg',
-                            width: 20,
-                            height: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Kembali',
-                            style: GoogleFonts.urbanist(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF3D2914),
+                  if (Navigator.canPop(context)) ...[
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: const Color(0xFF3D2914), width: 1.5),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/logos/back.svg',
+                              width: 20,
+                              height: 20,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Text(
+                              'Kembali',
+                              style: GoogleFonts.urbanist(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF3D2914),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                  ],
                   // Title and Start time with SOS button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,14 +493,7 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showCrisisSupport = !_showCrisisSupport;
-                            if (_showCrisisSupport) {
-                              FocusScope.of(context).unfocus();
-                            }
-                          });
-                        },
+                        onTap: _openSupportSheet,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
@@ -415,136 +535,6 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
               ),
             ),
             
-            // Removed the extra loading indicator; Handled directly in message stream
-            if (_showCrisisSupport)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFF7F2), Color(0xFFFFFCFA)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFF0D7CC)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3D2914).withOpacity(0.05),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 34,
-                          height: 34,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFFE5DA),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.shield_outlined,
-                            size: 18,
-                            color: Color(0xFF7A3E2D),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Bantuan krisis',
-                                style: GoogleFonts.urbanist(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF7A3E2D),
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Pilih salah satu jalur bantuan di bawah ini kalau kamu merasa tidak aman.',
-                                style: GoogleFonts.urbanist(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF8B5E50),
-                                  height: 1.35,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Sumber bantuan profesional yang tersedia:',
-                      style: GoogleFonts.urbanist(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                        color: const Color(0xFF8B5E50),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GridView.count(
-                      crossAxisCount: MediaQuery.of(context).size.width > 500 ? 2 : 1,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: MediaQuery.of(context).size.width > 500 ? 2.6 : 4.2,
-                      children: [
-                        _buildSupportButton(
-                          icon: Icons.public,
-                          title: 'Into The Light',
-                          subtitle: 'Bantuan profesional nasional',
-                          onPressed: () => _openSupportLink(
-                            Uri.parse('https://intothelightid.org'),
-                          ),
-                        ),
-                        _buildSupportButton(
-                          icon: Icons.local_hospital_outlined,
-                          title: 'UGM Counseling',
-                          subtitle: 'Tel. +62 274 513163',
-                          onPressed: () => _openSupportLink(
-                            Uri.parse('tel:+62274513163'),
-                          ),
-                        ),
-                        _buildSupportButton(
-                          icon: Icons.phone_in_talk_outlined,
-                          title: 'Hotline 119',
-                          subtitle: 'Layanan darurat nasional',
-                          onPressed: () => _openSupportLink(
-                            Uri.parse('tel:119'),
-                          ),
-                        ),
-                        _buildSupportButton(
-                          icon: Icons.chat_bubble_outline,
-                          title: 'Kembali ke chat',
-                          subtitle: 'Kalau kamu cuma perlu ditemani',
-                          onPressed: () {
-                            setState(() {
-                              _showCrisisSupport = false;
-                            });
-                            _scrollToBottom();
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
             // Input field
             Container(
               padding: const EdgeInsets.all(16.0),
@@ -576,13 +566,10 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                           Expanded(
                             child: TextField(
                               controller: _messageController,
-                              onTap: () {
-                                if (_showCrisisSupport) {
-                                  setState(() {
-                                    _showCrisisSupport = false;
-                                  });
-                                }
-                              },
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                              minLines: 1,
+                              maxLines: 4,
                               decoration: InputDecoration(
                                 hintText: 'Write your message',
                                 hintStyle: GoogleFonts.urbanist(
@@ -590,7 +577,6 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                                 ),
                                 border: InputBorder.none,
                               ),
-                              onSubmitted: (_) => _sendMessage(),
                             ),
                           ),
                         ],
@@ -640,7 +626,6 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
           ),
           child: MarkdownBody(
             data: text,
-            selectable: true,
             styleSheet: MarkdownStyleSheet(
               p: GoogleFonts.urbanist(
                 fontSize: 16,
@@ -903,8 +888,80 @@ class _MindbotChatScreenState extends State<MindbotChatScreen> {
                   _buildBotBubble(paragraphs[i]),
                   if (i < paragraphs.length - 1) const SizedBox(height: 6),
                 ],
+                if (GeminiChatService.isCrisisResponse(message.text)) ...[
+                  const SizedBox(height: 10),
+                  _buildInlineCrisisSupport(),
+                ],
               ],
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInlineCrisisSupport() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(right: 40),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF7F2), Color(0xFFFFFCFA)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF0D7CC)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFE5DA),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.shield_outlined,
+                  size: 18,
+                  color: Color(0xFF7A3E2D),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Panduan bantuan cepat',
+                  style: GoogleFonts.urbanist(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF7A3E2D),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildSupportButton(
+            icon: Icons.public,
+            title: 'Into The Light',
+            subtitle: 'Bantuan profesional nasional',
+            onPressed: () => _openSupportLink(
+              Uri.parse('https://intothelightid.org'),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _buildSupportButton(
+            icon: Icons.local_hospital_outlined,
+            title: 'UGM Counseling',
+            subtitle: 'Tel. +62 274 513163',
+            onPressed: () => _openSupportLink(
+              Uri.parse('tel:+62274513163'),
+            ),
+          ),
         ],
       ),
     );
